@@ -160,10 +160,32 @@ function showKeypairInfo(cfg, pw, secret, cb) {
             else {
                 let kp = str2Keypair(dec)
                 u.withIndent(() => showKeypair(kp))
-                cb(null)
+                showStellarInfo(cfg, kp.publicKey(), cb)
             }
         }
     })
+}
+
+/*      outcome/
+ * Display the status of the account on the stellar network
+ */
+function showStellarInfo(cfg, pk, cb) {
+    u.showMsg("*Stellar Info*:")
+    let svr = new StellarSdk.Server(cfg.HORIZON)
+    svr.loadAccount(pk)
+        .then(ai => {
+            u.withIndent(() => u.showMsg(u.publicVals(ai)))
+            cb(null)
+        })
+        .catch(err => {
+            u.withIndent(() => {
+                if(err.response && err.response.status == 404) {
+                    cb('Account not found on stellar network')
+                } else {
+                    cb(err)
+                }
+            })
+        })
 }
 
 /*      outcome/

@@ -8,6 +8,7 @@ module.exports = {
     showErr: showErr,
     ensureExists: ensureExists,
     withIndent: withIndent,
+    publicVals: publicVals,
 }
 
 /*      problem/
@@ -92,3 +93,17 @@ function ensureExists(path_, cb) {
     }
 }
 
+/*      outcome/
+ * Create a duplicate object that contains only the public values of the
+ * given object (ignore functions and `_private` values)
+ */
+function publicVals(o) {
+    let pv = {}
+    for(let k in o) {
+        if(!o.hasOwnProperty(k)) continue
+        if(k.startsWith('_')) continue
+        if(typeof o[k] === 'function') continue
+        pv[k] = o[k]
+    }
+    return pv
+}
