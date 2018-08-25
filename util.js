@@ -7,6 +7,35 @@ module.exports = {
     showMsg: showMsg,
     showErr: showErr,
     ensureExists: ensureExists,
+    withIndent: withIndent,
+}
+
+/*      problem/
+ * We would like to indent some of the output to 'section it' and make
+ * it more readable
+ *
+ *      way/
+ * We provide a 'withIndent' function that sets a global indent for all
+ * `showMsg/showErr` calls
+ */
+let NDNT = 0
+function withIndent(cb) {
+    NDNT++
+    cb()
+    NDNT--
+}
+
+/*      outcome/
+ * Add the current indent to every line
+ */
+function addNDNT(txt) {
+    if(!NDNT) return txt
+    let ndnt = ""
+    for(let i = 0;i < NDNT;i++) {
+        ndnt += '\t'
+    }
+    txt = txt.replace(/[\n\r]+/g, (m) => `${m}\t`)
+    return `${ndnt}${txt}`
 }
 
 /*      outcome/
@@ -14,6 +43,7 @@ module.exports = {
  */
 function showMsg(msg) {
     msg = toStr(msg)
+    msg = addNDNT(msg)
     console.log(msg)
 }
 
@@ -22,6 +52,7 @@ function showMsg(msg) {
  */
 function showErr(err) {
     err = toStr(err)
+    err = addNDNT(err)
     console.error(err)
 }
 
