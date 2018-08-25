@@ -4,5 +4,12 @@
   "description": "A command line interface for Stellar",
   "main": "index.js",
   "author": "charles.lobo@gmail.com",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "prompt": "^1.0.0",
+    "scrypt": "^6.0.3",
+    "stellar-sdk": "^0.10.3",
+    "tweetnacl": "^1.0.0",
+    "tweetnacl-util": "^0.15.0"
+  }
 }

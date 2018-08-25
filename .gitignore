@@ -1,3 +1,4 @@
 .*
 _tmp/
+stellar-keystore/
 node_modules/
