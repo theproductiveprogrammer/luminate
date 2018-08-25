@@ -2,6 +2,8 @@
 
 Luminate is a command-line wallet for [Stellar](https://www.stellar.org/).
 
+![luminate](luminate.png)
+
 Stellar has [an excellent API](https://www.stellar.org/developers/reference/)
 and [several excellent wallets](https://www.stellar.org/lumens/wallets/).
 The goal of Luminate is to add to this ecosystem by providing a command line
