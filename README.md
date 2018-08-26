@@ -1,6 +1,7 @@
 # Luminate
 
-Luminate is a command-line wallet for [Stellar](https://www.stellar.org/).
+Luminate is a free, open-source, command-line wallet for people who want
+to manage crypto on the [Stellar](https://www.stellar.org/) network.
 
 ![luminate](luminate.png)
 
@@ -23,8 +24,8 @@ installed then do the following:
 
 ```
 1. Download [Luminate](https://github.com/theproductiveprogrammer/luminate) from Github
-2. `yarn install`
-3. `node . <command>`
+2. Run `yarn install`
+3. Run `node . <command>`
     where `command` can be:
             keypair new : Create a new keypair for wallet
             keypair list: List all managed keypairs in wallet
@@ -32,6 +33,50 @@ installed then do the following:
             -h|--help|help: Show help
 ```
 
+## Connecting to the live network
+By default `Luminate` now connects to the 'stellar *test* network' by
+default. Please set the `HORIZON` parameter to `LIVE` in order to
+connect to the live network.
+
+```
+$ HORIZON=LIVE node . account info GD....
+```
+
+## Security
+`Luminate` stores and manages each of your wallet keys locally. All your
+data is stored on your machine (you can specify the location or use the
+default `stellar-keystore/`).
+
+In order to store your keys securely `Luminate` will ask you for a
+password when creating a new keypair. _This password is important and
+should be kept safe_. If you loose the password, there is no way for you
+to retrieve your keypair.
+
+Please backup your keypairs safely. Because they are encrypted they are
+safe to back up in your normal backup locations.
+
+## Options and Customization
+`Luminate` provides the following options you can customize.
+
+- `KEYSTORE_FOLDER`
+    This is the location where `Luminate` stores all your wallet keys
+    Defaults to `./stellar-keystore`
+
+- `HORIZON`
+    This is the stellar network to which the wallet connects.
+    _*By default this connects to the TEST network*_ (NOT the LIVE
+    network). In order to connect to the live network this needs to be
+    set to 'LIVE'
+    Defaults to ` https://horizon-testnet.stellar.org/` (TEST NETWORK)
+    Can be set to `LIVE` (will connect to `https://horizon.stellar.org/`)
+    or to a specific [Horizon Server](https://www.stellar.org/developers/horizon/reference/index.html)
+
+These parameters can be set as environment variables on the command
+line.
+
+```
+$ HORIZON=LIVE node . account info GD....
+```
 
 
 ## How to Contribute to Luminate
