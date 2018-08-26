@@ -57,8 +57,10 @@ function loadConfig() {
  */
 function args2UserReq(cfg) {
     const keypairHelp = `keypair management:\n\t\t- new\n\t\t- list`
+    const accountHelp = `account management:\n\t\t- info <id>`
     const argmap = [
-        { rx: /keypair/, fn: keypairCmd, help: "Show keypairs", help: keypairHelp },
+        { rx: /keypair/, fn: keypairCmd, help: keypairHelp },
+        { rx: /account/, fn: accountCmd, help: accountHelp },
         { rx: /-h|--help|help/, fn: () => showHelp(argmap), help: "Show help" },
     ];
 
@@ -77,16 +79,15 @@ function args2UserReq(cfg) {
     return () => didNotUnderstand(cmd)
 }
 
-function doNothing() {}
-
 function didNotUnderstand(cmd) {
+    if(!cmd) cmd = ""
     u.showMsg(`Did not understand: '${cmd}'`)
 }
 
-function keypairCmd(cfg, cmd) {
-    if(cmd == "new") return newKeypair(cfg)
-    if(cmd == "list") return listKeypairs(cfg)
-    didNotUnderstand(cmd)
+function keypairCmd(cfg, cmds) {
+    if(cmds[0] == "new") return newKeypair(cfg)
+    if(cmds[0] == "list") return listKeypairs(cfg)
+    didNotUnderstand(cmds[0])
 }
 
 /*      outcome/
@@ -169,10 +170,10 @@ function showKeypairInfo(cfg, pw, secret, cb) {
 /*      outcome/
  * Display the status of the account on the stellar network
  */
-function showStellarInfo(cfg, pk, cb) {
+function showStellarInfo(cfg, acc, cb) {
     u.showMsg("*Stellar Info*:")
     let svr = new StellarSdk.Server(cfg.HORIZON)
-    svr.loadAccount(pk)
+    svr.loadAccount(acc)
         .then(ai => {
             u.withIndent(() => u.showMsg(u.publicVals(ai)))
             cb(null)
@@ -353,6 +354,20 @@ function decode(enc, nonce, password) {
     if(!dec) return dec
     else return naclUtil.encodeUTF8(dec)
 }
+
+
+function accountCmd(cfg, cmds) {
+    if(cmds[0] == "info") return showAccountInfo(cfg, cmds[1])
+    didNotUnderstand(cmds[0])
+}
+
+function showAccountInfo(cfg, acc) {
+    if(!acc) u.showErr('Please provide the account key')
+    else showStellarInfo(cfg, acc, (err) => {
+        if(err) u.showErr(err)
+    })
+}
+
 
 /*      outcome/
  * Use the argmap to show a help message directly converting the regular
