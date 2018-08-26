@@ -66,7 +66,7 @@ function args2UserReq(cfg) {
     process.argv.shift()
 
     let cmd = process.argv[0]
-    if(!cmd) return doNothing
+    if(!cmd) return () => showHelp(argmap)
 
     process.argv.shift()
     for(let i = 0;i < argmap.length;i++) {
