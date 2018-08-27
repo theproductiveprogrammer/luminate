@@ -2,11 +2,11 @@
   "name": "luminate",
   "version": "0.1.0",
   "description": "A command line interface for Stellar",
-  "main": "index.js",
+  "main": "luminate.js",
   "author": "charles.lobo@gmail.com",
   "license": "MIT",
   "dependencies": {
-    "prompt": "^1.0.0",
+    "read": "^1.0.7",
     "scrypt": "^6.0.3",
     "stellar-sdk": "^0.10.3",
     "tweetnacl": "^1.0.0",

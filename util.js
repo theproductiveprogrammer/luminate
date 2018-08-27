@@ -6,6 +6,7 @@ const util = require('util')
 module.exports = {
     showMsg: showMsg,
     showErr: showErr,
+    showObj: showObj,
     ensureExists: ensureExists,
     withIndent: withIndent,
     publicVals: publicVals,
@@ -56,6 +57,12 @@ function showMsg(msg) {
     console.log(msg)
 }
 
+function showObj(o) {
+    let m = util.inspect(o, {depth:null})
+    m = addNDNT(m)
+    console.log(m)
+}
+
 /*      outcome/
  * Show error log of the given message/object
  */
@@ -72,7 +79,7 @@ function showErr(err) {
 function toStr(obj) {
     if(DEBUG) {
         if(typeof obj === "string") return obj
-        var m = util.inspect(obj, {depth:null})
+        let m = util.inspect(obj, {depth:null})
         if(obj.stack) m += obj.stack
         return m
     } else {
