@@ -58,6 +58,10 @@ safe to back up in your normal backup locations.
 ## Options and Customization
 `Luminate` provides the following options you can customize.
 
+- `DEBUG`
+    If we set `DEBUG`, `Luminate` will dump more detail (including stack
+    information in errors)
+
 - `KEYSTORE_FOLDER`
     This is the location where `Luminate` stores all your wallet keys
     Defaults to `./stellar-keystore`

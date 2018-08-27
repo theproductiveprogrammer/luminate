@@ -9,7 +9,15 @@ module.exports = {
     ensureExists: ensureExists,
     withIndent: withIndent,
     publicVals: publicVals,
+    setDbgOn: setDbgOn,
 }
+
+/*      understand/
+ * If debug is on show a lot of detail about objects in the message.
+ * Otherwise just show them as strings.
+ */
+let DEBUG = false
+function setDbgOn() { DEBUG = true }
 
 /*      problem/
  * We would like to indent some of the output to 'section it' and make
@@ -62,10 +70,14 @@ function showErr(err) {
  * present).
  */
 function toStr(obj) {
-    if(typeof obj === "string") return obj;
-    var m = util.inspect(obj, {depth:null});
-    if(obj.stack) m += obj.stack;
-    return m;
+    if(DEBUG) {
+        if(typeof obj === "string") return obj
+        var m = util.inspect(obj, {depth:null})
+        if(obj.stack) m += obj.stack
+        return m
+    } else {
+        return ""+obj
+    }
 }
 
 /*      outcome/

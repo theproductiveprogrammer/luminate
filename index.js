@@ -14,6 +14,7 @@ const fs = require('fs')
  */
 function main() {
     let cfg = loadConfig()
+    if(cfg.DEBUG) u.setDbgOn()
     let do_what_user_asked = args2UserReq(cfg)
     do_what_user_asked()
 }
@@ -23,10 +24,11 @@ function main() {
  */
 function loadConfig() {
     let cfg = {};
+    cfg.DEBUG = process.env.DEBUG
     if(process.env.KEYSTORE_FOLDER) {
         cfg.KEYSTORE_FOLDER = process.env.KEYSTORE_FOLDER;
     } else {
-        cfg.KEYSTORE_FOLDER = "./stellar-keystore";
+        cfg.KEYSTORE_FOLDER = "./stellar-keystore"
     }
     if(process.env.HORIZON) {
         if(process.env.HORIZON == "LIVE") {
