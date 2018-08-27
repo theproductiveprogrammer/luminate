@@ -62,6 +62,7 @@ function args2UserReq(cfg) {
     const argmap = [
         { rx: /status/, fn: showStatus },
         { rx: /new/, fn: newAccount },
+        { rx: /add/, fn: addAccount },
         { rx: /-h|--help|help/, fn: showHelp },
     ];
 
@@ -86,18 +87,55 @@ function didNotUnderstand(cmd) {
 }
 
 /*      outcome/
+ * Given an existing account (we prove we have access because we have
+ * the secret key) we create a keypair and add it to our wallet to
+ * manage.
+ */
+function addAccount(cfg, cmds) {
+    let verbose = false
+    if(cmds[0] == '-v') {
+        verbose = true
+        cmds.shift()
+    }
+    let secret = cmds[0]
+    if(!secret) u.showErr(`Provide secret to add to wallet`)
+    else {
+        u.showMsg(`Adding account to the wallet...`)
+        try {
+            let kp = StellarSdk.Keypair.fromSecret(secret)
+            addAccountKP(cfg, verbose, kp)
+        } catch(e) {
+            u.showErr(e)
+        }
+    }
+}
+
+/*      outcome/
  * Check if we want to be verbose or silent and then create a new
  * account in the wallet.
  */
 function newAccount(cfg, cmds) {
     let verbose = cmds[0] != '-q'
     if(verbose) u.showMsg(`Adding a new account to the wallet...`)
+    try {
+        let kp = StellarSdk.Keypair.random()
+        addAccountKP(cfg, verbose, kp)
+    } catch(e) {
+        if(verbose) u.showErr(e)
+        else u.showErr(`!Error`)
+    }
+}
+
+/*      outcome/
+ * Add a keypair to the wallet
+ */
+function addAccountKP(cfg, verbose, kp) {
     u.ensureExists(cfg.KEYSTORE_FOLDER, (err) => {
         if(err) {
             if(verbose) u.showErr(err)
             else u.showErr(`!Error creating wallet folder: ${cfg.KEYSTORE_FOLDER}`)
         } else {
-            new_account_1(cfg.KEYSTORE_FOLDER, verbose)
+            new_account_1(kp, cfg.KEYSTORE_FOLDER, verbose)
         }
     })
 
@@ -105,7 +143,7 @@ function newAccount(cfg, cmds) {
      * Get the label for this account, and the password to encrypt it
      * from the user. Create the account in the wallet.
      */
-    function new_account_1(wallet, verbose) {
+    function new_account_1(kp, wallet, verbose) {
         if(verbose) u.showMsg(`Please provide a name for the new account`)
         read({
             prompt: "Name:",
@@ -127,7 +165,7 @@ function newAccount(cfg, cmds) {
                             if(verbose) u.showErr(err)
                             else u.showErr(`!Error`)
                         } else {
-                            create_account_1(name, pw, wallet, (err, secret) => {
+                            create_account_1(kp, name, pw, wallet, (err, secret) => {
                                 if(err) {
                                     if(verbose) u.showErr(err)
                                     else u.showErr(`!Error`)
@@ -147,8 +185,7 @@ function newAccount(cfg, cmds) {
      * wallet. Encrypt this by generating a key from the user's
      * password.
      */
-    function create_account_1(name, password, wallet, cb) {
-        let kp = StellarSdk.Keypair.random()
+    function create_account_1(kp, name, password, wallet, cb) {
         let serial = keypair2Str(kp)
         let secret = {
             label: name,
@@ -528,6 +565,7 @@ USAGE:
 where the commands are:
     status [-v] [account]: Show status of wallet accounts [optional verbose mode]
     new [-q]: Create a new wallet account (must be funded on stellar)
+    add [-v] <secret>: Import an existing account to the wallet (given the 32-byte 'secret' seed in ed25519)
 `)
 }
 
