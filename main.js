@@ -596,7 +596,7 @@ function showSecretInfo(cfg, verbose, secret, cb) {
 
         function t(b) {
             if(b.asset_type == 'native') return 'XLM'
-            return b.asset_type
+            return b.asset_code
         }
     }
 }
