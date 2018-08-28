@@ -81,6 +81,7 @@ function args2UserReq(cfg) {
         { rx: /create/, fn: createAccount },
         { rx: /add/, fn: addAccount },
         { rx: /trust/, fn: manageTrustline },
+        { rx: /pay/, fn: sendPayment },
         { rx: /-h|--help|help/, fn: showHelp },
     ];
 
@@ -104,6 +105,162 @@ function didNotUnderstand(cmd) {
     u.showErr(`Did not understand: '${cmd}'`)
 }
 
+/*      outcome/
+ * Send the requested payment to the destination account from the source
+ * wallet account.
+ */
+function sendPayment(cfg, cmds) {
+    let verbose = false
+    if(cmds[0] == '-v') {
+        verbose = true
+        cmds.shift()
+    }
+
+    let dest = cmds[0]
+    let acc = cmds[1]
+    let amt = cmds[2]
+    let asset = cmds[3]
+    let issuer = cmds[4]
+
+    if(!asset) return u.showErr(`!Error: Incorrect parameters`)
+
+    loadSecrets(verbose, cfg, (err, secrets) => {
+        if(err) {
+            if(verbose) u.showErr(err)
+            else u.showErr(`!Error`)
+        } else {
+            matchSecret(secrets, acc, (err, secret) => {
+                if(err) u.showErr(err)
+                else send_payment_1(secret)
+            })
+        }
+    })
+
+    /*      outcome/
+     * Decrypt the source account in our wallet, load the requested
+     * asset, and send the payment.
+     */
+    function send_payment_1(secret) {
+        withPassword((err, pw) => {
+            if(err) {
+                if(verbose) u.showErr(err)
+                else u.showErr(`!Error`)
+            } else {
+                decodeSecretInfo(pw, secret, (err, s) => {
+                    if(err) {
+                        if(verbose) u.showErr(err)
+                        else u.showErr(`!Error: bad password`)
+                    } else {
+                        send_payment_2_1(secret)
+                    }
+                })
+            }
+        })
+    }
+
+    /*      outcome/
+     * Create a stellar asset and use it to pay. If the asset code is
+     * 'XLM', we use the 'native' currency. Otherwise we create a new
+     * stellar asset from the asset code and issuer. If the user has not
+     * explicitely given the issuer, we load the account information and
+     * look for a matching issuer.
+     */
+    function send_payment_2_1(secret, cb) {
+        try {
+            if(asset.toLowerCase() == 'xlm') {
+                let sa = StellarSdk.Asset.native()
+                sendStellarPayment(cfg, secret, amt, sa, dest, show_res_1)
+            } else if(issuer) {
+                let sa = new StellarSdk.Asset(asset, issuer)
+                sendStellarPayment(cfg, secret, amt, sa, dest, show_res_1)
+            } else {
+                getStellarInfo(cfg, secret._kp.publicKey(), (err,ai) => {
+                    if(err) {
+                        if(verbose) u.showErr(err)
+                        else u.showErr(`!Error`)
+                    } else {
+                        find_matching_issuer_1(asset, ai, dest, (err, issuer) => {
+                            if(err) {
+                                if(verbose) u.showErr(err)
+                                else u.showErr(`!Error`)
+                            } else {
+                                if(!issuer) {
+                                    u.showMsg(`!Error: Did not understand asset type "${asset}"`)
+                                } else {
+                                    let sa = new StellarSdk.Asset(asset, issuer)
+                                    sendStellarPayment(cfg, secret, amt, sa, dest, show_res_1, ai)
+                                }
+                            }
+                        })
+                    }
+                })
+            }
+        } catch(e) {
+            if(verbose) u.showErr(e)
+            else u.showErr(`!Error`)
+        }
+
+        function show_res_1(err, txn) {
+            if(err) {
+                if(verbose) u.showErr(err)
+                else u.showErr(`!Error`)
+            } else {
+                u.showMsg(`Payment done!`)
+            }
+        }
+    }
+
+    /*      understand/
+     * In order to pay from a destination account, the account must
+     * contain a balance of that asset or be the issuer of that asset.
+     *
+     *      situtation/
+     * The user has asked to pay with a certain asset (say 'CAR').
+     *
+     *      problem/
+     * We also need to know who is responsible for issuing these
+     * 'CAR's and the user does not want to keep typing in 'CAR' GAxxxx
+     *
+     *      way/
+     * We look into the account balances to find a matching asset of
+     * type 'CAR'. The balance will contain the issuer which we can then
+     * return. If we find more than one match we fail (we don't want to
+     * return the wrong asset! Better, in this case, to force the user
+     * to specify the issuer manually)
+     * If we still fail, perhaps this account is the issuer of the
+     * asset so we look in the destination account to check if that is
+     * the case.
+     */
+    function find_matching_issuer_1(asset, ai, dest, cb) {
+        let issuer
+        for(let i = 0;i < ai.balances.length;i++) {
+            let b = ai.balances[i]
+            if(b.asset_code == asset) {
+                if(issuer) return cb() /* more than one match */
+                issuer = b.asset_issuer
+            }
+        }
+        if(issuer) return cb(null, issuer)
+        getStellarInfo(cfg, dest, (err,dai) => {
+            if(err) cb(err)
+            else {
+                for(let i = 0;i < dai.balances.length;i++) {
+                    let b = dai.balances[i]
+                    if(b.asset_code == asset &&
+                        b.asset_issuer == ai.id) {
+                        return cb(null, b.asset_issuer)
+                    }
+                }
+                cb() /* no match */
+            }
+        })
+    }
+}
+
+/*      outcome/
+ * Add/revoke trustlines to a wallet account depending on what the user
+ * requested.
+ */
 function manageTrustline(cfg, cmds) {
     let revoke = false
     if(cmds[0] == "-revoke" || cmds[0] == "--revoke") {
@@ -332,7 +489,7 @@ function addAccountKP(cfg, verbose, kp) {
                 if(verbose) u.showErr(err)
                 else u.showErr(`!Error`)
             } else {
-                if(!name) u.showError('Please provide a name')
+                if(!name) u.showErr('Please provide a name')
                 else {
                     if(verbose) {
                         u.withIndent(() => {
@@ -666,6 +823,41 @@ function addTrustline(cfg, revoke, acc, code, issuer, cb) {
 }
 
 /*      outcome/
+ * Send the asset payment from the source stellar account to the
+ * destination. As an optimization, sometimes we have already got the
+ * account info so we need not load it again.
+ */
+function sendStellarPayment(cfg, src, amt, asset, dest, cb, src_) {
+    try {
+        let svr = new StellarSdk.Server(cfg.HORIZON)
+        if(!src_) {
+            svr.loadAccount(src.pub)
+            .then(send_stellar_payment_1)
+            .catch(cb)
+        } else {
+            send_stellar_payment_1(src_)
+        }
+
+        function send_stellar_payment_1(ai) {
+            let txn = new StellarSdk.TransactionBuilder(ai)
+                .addOperation(StellarSdk.Operation.payment({
+                    destination: dest,
+                    asset: asset,
+                    amount: amt,
+                }))
+                .build()
+            txn.sign(src._kp)
+            svr.submitTransaction(txn)
+                .then(txnres => cb(null, txnres))
+                .catch(cb)
+        }
+    } catch(e) {
+        cb(e)
+    }
+}
+
+
+/*      outcome/
 
 /*      outcome/
  * If there are no existing accounts (and we are verbose) show the user
@@ -815,6 +1007,7 @@ where the commands are:
     create [-q] <account|#> <funds> <#acc>: Create (and fund) an account on stellar using wallet account 'acc'
     add [-v] <secret>: Import an existing account to the wallet (given the 32-byte ed25519 'secret' seed)
     trust [-revoke] <#acc> <assetCode> <issuer>: Add[Revoke] Trustline for Asset from Issuer
+    pay [-v] <dest> <#acc> <amount> <asset> [issuer]: Pay 'dest' from 'acc'
 `)
 }
 
