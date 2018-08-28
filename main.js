@@ -260,7 +260,7 @@ function createAccount(cfg, cmds) {
  * found - that must be the one the user is looking for
  */
 function matchSecret(secrets, secret, cb) {
-    secrets = filterSecrets(secrets, [secret])
+    secrets = filterSecrets(secrets, secret)
     if(secrets.length == 0) cb(`${secret} does not match any wallet account`)
     else if(secrets.length != 1) cb(`${secret} matches multiple wallet accounts`)
     else cb(null, secrets[0])
@@ -404,11 +404,12 @@ function addAccountKP(cfg, verbose, kp) {
  */
 function showStatus(cfg, cmds) {
     let verbose = false
-    let accs = []
-    for(let i = 0;i < cmds.length;i++) {
-        if(cmds[i] == '-v') verbose = true
-        else accs.push(cmds[i])
+    if(cmds[0] == '-v') {
+        verbose = true
+        cmds.shift()
     }
+    let acc = cmds[0]
+
     loadSecrets(verbose, cfg, (err, secrets) => {
         if(err) {
             if(!verbose) {
@@ -419,7 +420,7 @@ function showStatus(cfg, cmds) {
         } else {
             if(!secrets || !secrets.length) showNoAccountsMsg(cfg, verbose)
             else {
-                secrets = filterSecrets(secrets, accs)
+                secrets = filterSecrets(secrets, acc)
                 show_secrets_status_1(verbose, secrets)
             }
         }
@@ -463,21 +464,15 @@ function showStatus(cfg, cmds) {
 }
 
 /*      outcome/
- * Find maching secrets for the listed accounts.
+ * Find maching secrets for the listed account.
  */
-function filterSecrets(secrets, accs) {
-    if(!accs || !accs.length) return secrets
+function filterSecrets(secrets, acc) {
+    if(!acc|| !acc.length) return secrets
     let r = []
-    for(let i = 0;i < accs.length;i++) {
-        filter_secrets_1(accs[i])
+    for(let i = 0;i < secrets.length;i++) {
+        if(does_match_1(acc, secrets[i])) add_if_new_1(secrets[i])
     }
     return r
-
-    function filter_secrets_1(acc) {
-        for(let i = 0;i < secrets.length;i++) {
-            if(does_match_1(acc, secrets[i])) add_if_new_1(secrets[i])
-        }
-    }
 
     /*      outcome/
      * Check if the user has specified the label of the account OR the
@@ -815,11 +810,11 @@ USAGE:
 ./luminate <commands>
 
 where the commands are:
-    status [-v] [acc...]: Show status of wallet accounts [optional verbose mode]
+    status [-v] [#acc]: Show status of wallet accounts (or specified account)
     new [-q]: Create a new wallet account (create on stellar using 'create' command)
-    create [-q] <account> <funds> <acc>: Create (and fund) an account on stellar using wallet account 'acc'
+    create [-q] <account|#> <funds> <#acc>: Create (and fund) an account on stellar using wallet account 'acc'
     add [-v] <secret>: Import an existing account to the wallet (given the 32-byte ed25519 'secret' seed)
-    trust [-revoke] <acc> <assetCode> <issuer>: Add[Revoke] Trustline for Asset from Issuer
+    trust [-revoke] <#acc> <assetCode> <issuer>: Add[Revoke] Trustline for Asset from Issuer
 `)
 }
 
