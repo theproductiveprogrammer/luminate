@@ -1002,12 +1002,25 @@ USAGE:
 ./luminate <commands>
 
 where the commands are:
-    status [-v] [#acc]: Show status of wallet accounts (or specified account)
-    new [-q]: Create a new wallet account (create on stellar using 'create' command)
-    create [-q] <account|#> <funds> <#acc>: Create (and fund) an account on stellar using wallet account 'acc'
-    add [-v] <secret>: Import an existing account to the wallet (given the 32-byte ed25519 'secret' seed)
-    trust [-revoke] <#acc> <assetCode> <issuer>: Add[Revoke] Trustline for Asset from Issuer
-    pay [-v] <dest> <#acc> <amount> <asset> [issuer]: Pay 'dest' from 'acc'
+    status  :   Show status of wallet accounts
+    new     :   Create a new wallet account (Use the 'create' command to reflect this account on stellar)
+    create  :   Create (and fund) an account on stellar
+    add     :   Import an existing account to the wallet
+    trust   :   Add/Revoke Trustline
+    pay     :   Send payments
+
+    help    :   Show this help
+
+Parameter reference:
+    status [-v] [#acc]
+    new [-q]
+    create [-q] <account|#> <funds> <#acc>
+    add [-v] <secret>
+    trust [-revoke] <#acc> <assetCode> <issuer>
+    pay [-v] <dest> <#acc> <amount> <assetCode> [issuer]
+
+(Refer to the README/Manual for more details)
+
 `)
 }
 
