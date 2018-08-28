@@ -11,11 +11,13 @@ const fs = require('fs')
 
 
 /*      outcome/
- * Do what the user (via the command line arguments) has asked us to do.
+ * Load the configuration, set up the stellar network, and then do what
+ * the user (via the command line arguments) has asked us to do.
  */
 function main() {
     let cfg = loadConfig()
     if(cfg.DEBUG) u.setDbgOn()
+    setupStellarNetwork(cfg)
     let do_what_user_asked = args2UserReq(cfg)
     do_what_user_asked()
 }
@@ -43,6 +45,20 @@ function loadConfig() {
     return cfg;
 }
 
+/*      outcome/
+ * Set up the stellar network id based on if it is the test network or
+ * the public network.
+ * TODO: Why? What happens if we have a different network (not testnet
+ * or stellar public horizon) is unclear.
+ */
+function setupStellarNetwork(cfg) {
+    if(cfg.HORIZON == "https://horizon.stellar.org/") {
+            StellarSdk.Network.usePublicNetwork()
+    } else {
+            StellarSdk.Network.useTestNetwork()
+    }
+}
+
 /*      problem/
  * The user wants to ask us to somethings with different parameters
  *
@@ -62,6 +78,7 @@ function args2UserReq(cfg) {
     const argmap = [
         { rx: /status/, fn: showStatus },
         { rx: /new/, fn: newAccount },
+        { rx: /create/, fn: createAccount },
         { rx: /add/, fn: addAccount },
         { rx: /-h|--help|help/, fn: showHelp },
     ];
@@ -84,6 +101,119 @@ function args2UserReq(cfg) {
 function didNotUnderstand(cmd) {
     if(!cmd) cmd = ""
     u.showErr(`Did not understand: '${cmd}'`)
+}
+
+/*      outcome/
+ * Create (and fund) an account on the stellar network using the funds
+ * from an account in our wallet.
+ */
+function createAccount(cfg, cmds) {
+    let verbose = true
+    if(cmds[0] == '-q') {
+        verbose = false
+        cmds.shift()
+    }
+
+    if(cmds.length != 3) return u.showErr(`!Error: Incorrect parameters`)
+    let acc = cmds[0]
+    let funds = cmds[1]
+    let src = cmds[2]
+
+    create_account_1(funds, acc, src)
+
+    /*      outcome/
+     * Find the matching account from our wallet and create the new
+     * account (which should generally also be in our wallet unless we
+     * are creating an account for someone else).
+     * Create a stellar account with these accounts.
+     */
+    function create_account_1(funds, acc, src) {
+        loadSecrets(verbose, cfg, (err, secrets) => {
+            if(err) {
+                if(verbose) u.showErr(err)
+                else u.showErr(`!Error`)
+            } else {
+                matchSecret(secrets, acc, (err, acc_) => {
+                    if(err) {
+                        if(verbose) {
+                            u.showMsg(`!Warning: You are creating an account (${acc}) that is not in the wallet and managed by you`)
+                            read({
+                                prompt: "Are you sure you want to proceed?(yes/*):",
+                            }, (err, res) => {
+                                if(err) {
+                                    if(verbose) u.showErr(err)
+                                } else {
+                                    if(res !== "yes") {
+                                        create_account_2_1(secrets, acc)
+                                    }
+                                }
+                            })
+                        } else {
+                            create_account_2_1(secrets, acc)
+                        }
+                    } else {
+                        create_account_2_1(secrets, acc_.pub)
+                    }
+                })
+            }
+        })
+
+        function create_account_2_1(secrets, acc) {
+            matchSecret(secrets, src, (err, secret) => {
+                if(err) u.showErr(err)
+                else create_stellar_account_1(secret, acc)
+            })
+        }
+
+        /*      understand/
+         * Stellar accounts need to be funded before they are allowed on
+         * the network. Therefore we need use a source account from our
+         * wallet to fund it.
+         *
+         *      outcome/
+         * Open the wallet account and use it to fund the newly created
+         * `acc` on the stellar network.
+         */
+        function create_stellar_account_1(src, acc) {
+            withPassword((err, pw) => {
+                if(err) {
+                    if(verbose) u.showErr(err)
+                    else u.showErr(`!Error`)
+                } else {
+                    decodeSecretInfo(pw, src, (err, src_) => {
+                        if(err) {
+                            if(verbose) u.showErr(err)
+                            else u.showErr(`!Error: bad password`)
+                        } else {
+                            if(verbose) u.showMsg(`Creating ${acc} on the stellar network with ${funds} from ${src_.pub}`)
+                            createStellarAccount(cfg, acc, funds, src_,(err) => {
+                                if(err) {
+                                    if(verbose) u.showErr(err)
+                                    else u.showErr(`!Error`)
+                                } else {
+                                    u.showMsg(`Account ${acc} created on stellar`)
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        }
+    }
+}
+
+/*      situation/
+ * The user wants to select an account from the wallet.
+ *
+ *      outcome/
+ * We look for matching secrets in the wallet and - if exactly one is
+ * found - that must be the one the user is looking for
+ */
+function matchSecret(secrets, secret, cb) {
+    secrets = filterSecrets(secrets, [secret])
+    if(secrets.length == 0) cb(`${secret} does not match any wallet account`)
+    else if(secrets.length != 1) cb(`${secret} matches multiple wallet accounts`)
+    else cb(null, secrets[0])
 }
 
 /*      outcome/
@@ -170,7 +300,14 @@ function addAccountKP(cfg, verbose, kp) {
                                     if(verbose) u.showErr(err)
                                     else u.showErr(`!Error`)
                                 } else {
-                                    showSecretInfo(cfg, verbose, pw, secret, () => {})
+                                    decodeSecretInfo(pw, secret, (err, s) => {
+                                        if(err) {
+                                            if(verbose) u.showErr(err)
+                                            else u.showErr(`!Error`)
+                                        } else {
+                                            showSecretInfo(cfg, verbose, s, () => {})
+                                        }
+                                    })
                                 }
                             })
                         }
@@ -259,8 +396,16 @@ function showStatus(cfg, cmds) {
 
         function show_secret_ndx_1(pw, ndx) {
             if(ndx < secrets.length) {
-                showSecretInfo(cfg, verbose, pw, secrets[ndx], () => {
-                    show_secret_ndx_1(pw, ndx+1)
+                decodeSecretInfo(pw, secrets[ndx], (err, s) => {
+                    if(err) {
+                        if(verbose) u.showErr(err)
+                        else u.showErr(`!Error: ${secrets[ndx].label}`)
+                        show_secret_ndx_1(pw, ndx+1)
+                    } else {
+                        showSecretInfo(cfg, verbose, s, () => {
+                            show_secret_ndx_1(pw, ndx+1)
+                        })
+                    }
                 })
             }
         }
@@ -343,36 +488,41 @@ function loadSecrets(verbose, cfg, cb) {
 }
 
 /*      outcome/
- * Use the password to decrypt the account info in the secret and show
- * it along with information about the account on the stellar network.
+ * Use the given password to decrypt the account info in the secret
  */
-function showSecretInfo(cfg, verbose, pw, secret, cb) {
+function decodeSecretInfo(pw, secret, cb) {
     password2key(secret.salt, pw, (err, key) => {
         if(err) cb(err)
         else {
             let dec = decode(secret.keypair, secret.nonce, key)
             if(!dec) {
-                u.showErr(`!Error incorrect password for: ${secret.label}`)
-                cb()
+                cb(`!Error: Incorrect password for: ${secret.label}`)
             } else {
                 try {
                     secret._kp = str2Keypair(dec)
-                    getStellarInfo(cfg, secret._kp.publicKey(), (err,si) => {
-                        if(verbose) {
-                            if(err) u.showErr(err)
-                            else show_full_secret_info_1(secret, si)
-                        } else {
-                            if(err) u.showErr(`!Error getting info for: ${secret.label}`)
-                            else show_simple_secret_info_1(secret, si)
-                        }
-                        cb()
-                    })
+                    cb(null, secret)
                 } catch(e) {
-                    if(verbose) u.showErr(e)
-                    else u.showErr(`!Error getting info for: ${secret.label}`)
+                    cb(e)
                 }
             }
         }
+    })
+}
+
+/*      outcome/
+ * Get information about the account from the stellar network and show
+ * the account information.
+ */
+function showSecretInfo(cfg, verbose, secret, cb) {
+    getStellarInfo(cfg, secret._kp.publicKey(), (err,si) => {
+        if(verbose) {
+            if(err) u.showErr(err)
+            else show_full_secret_info_1(secret, si)
+        } else {
+            if(err) u.showErr(`!Error getting info for: ${secret.label}`)
+            else show_simple_secret_info_1(secret, si)
+        }
+        cb()
     })
 
     function show_full_secret_info_1(secret, si) {
@@ -418,6 +568,26 @@ function getStellarInfo(cfg, acc, cb) {
             if(err.response && err.response.status == 404) cb()
             else cb(err)
         })
+}
+
+/*      outcome/
+ * Create account on the stellar network
+ */
+function createStellarAccount(cfg, acc, funds, src, cb) {
+    let svr = new StellarSdk.Server(cfg.HORIZON)
+    svr.loadAccount(src.pub)
+        .then(ai => {
+            let txn = new StellarSdk.TransactionBuilder(ai)
+                .addOperation(StellarSdk.Operation.createAccount({
+                    destination: acc,
+                    startingBalance: funds,
+                }))
+                .build()
+            txn.sign(src._kp)
+            return svr.submitTransaction(txn)
+        })
+        .then(txnres => cb(null, txnres))
+        .catch(cb)
 }
 
 /*      outcome/
@@ -563,8 +733,9 @@ USAGE:
 ./luminate.js <commands>
 
 where the commands are:
-    status [-v] [account]: Show status of wallet accounts [optional verbose mode]
-    new [-q]: Create a new wallet account (must be funded on stellar)
+    status [-v] [acc...]: Show status of wallet accounts [optional verbose mode]
+    new [-q]: Create a new wallet account (create on stellar using 'create' command)
+    create [-q] <account> <funds> <acc>: Create (and fund) an account on stellar using wallet account 'acc'
     add [-v] <secret>: Import an existing account to the wallet (given the 32-byte 'secret' seed in ed25519)
 `)
 }
