@@ -706,7 +706,7 @@ function password2key(salt, password, cb) {
  */
 function saveSecret(wallet, secret, cb) {
     let dt = new Date().toISOString()
-    let fname = `UTC-${dt}-${secret.pub}.stellar`
+    let fname = `UTC-${dt}-${secret.label}-${secret.pub}.stellar`
     let p = path.join(wallet, fname)
     fs.writeFile(p, JSON.stringify(secret), 'utf-8', cb)
 }
