@@ -3,7 +3,7 @@
 Luminate is a free, open-source, command-line wallet for people who want
 to manage crypto on the [Stellar](https://www.stellar.org/) network.
 
-![luminate](luminate.png)
+![luminate](icon_400x400.png)
 
 Stellar has [an excellent API](https://www.stellar.org/developers/reference/)
 and [several excellent wallets](https://www.stellar.org/lumens/wallets/).
@@ -25,7 +25,7 @@ installed then do the following:
 ```
 1. Download [Luminate](https://github.com/theproductiveprogrammer/luminate) from Github
 2. Run `yarn install`
-3. Run `node . <command>`
+3. Run `./luminate <command>`
     where `command` can be:
             keypair new : Create a new keypair for wallet
             keypair list: List all managed keypairs in wallet

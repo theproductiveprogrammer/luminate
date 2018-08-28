@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 'use strict'
 const u = require('./util')
 const StellarSdk = require('stellar-sdk')
@@ -9,6 +8,7 @@ const read = require('read')
 const path = require('path')
 const fs = require('fs')
 
+module.exports = main
 
 /*      outcome/
  * Load the configuration, set up the stellar network, and then do what
@@ -812,7 +812,7 @@ function showHelp() {
     Command-line wallet for Stellar
 
 USAGE:
-./luminate.js <commands>
+./luminate <commands>
 
 where the commands are:
     status [-v] [acc...]: Show status of wallet accounts [optional verbose mode]
@@ -823,4 +823,3 @@ where the commands are:
 `)
 }
 
-main()
