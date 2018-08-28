@@ -80,6 +80,7 @@ function args2UserReq(cfg) {
         { rx: /new/, fn: newAccount },
         { rx: /create/, fn: createAccount },
         { rx: /add/, fn: addAccount },
+        { rx: /trust/, fn: manageTrustline },
         { rx: /-h|--help|help/, fn: showHelp },
     ];
 
@@ -101,6 +102,55 @@ function args2UserReq(cfg) {
 function didNotUnderstand(cmd) {
     if(!cmd) cmd = ""
     u.showErr(`Did not understand: '${cmd}'`)
+}
+
+function manageTrustline(cfg, cmds) {
+    let revoke = false
+    if(cmds[0] == "-revoke" || cmds[0] == "--revoke") {
+        revoke = true
+        cmds.shift()
+    }
+
+    let acc = cmds[0]
+    let code = cmds[1]
+    let issuer = cmds[2]
+
+    if(!issuer) return u.showErr(`!Error: Invalid parameters`)
+
+    let verbose = false
+
+    loadSecrets(verbose, cfg, (err, secrets) => {
+        if(err) u.showErr(err)
+        else {
+            matchSecret(secrets, acc, (err, secret) => {
+                if(err) u.showErr(err)
+                else {
+                    withPassword((err, pw) => {
+                        if(err) u.showErr(err)
+                        else decodeSecretInfo(pw, secret, (err, s) => {
+                            if(err) u.showErr(err)
+                            else {
+                                if(revoke) {
+                                    u.showMsg(`Removing trustline from ${s.pub} for ${code} from ${issuer}`)
+                                } else {
+                                    u.showMsg(`Setting up trustline for ${s.pub} to allow ${code} from ${issuer}`)
+                                }
+                                addTrustline(cfg, revoke, s, code, issuer, (err) => {
+                                    if(err) u.showErr(err)
+                                    else {
+                                        if(revoke) u.showMsg(`Trustline revoked`)
+                                        else u.showMsg(`Trustline added`)
+                                    }
+                                })
+                            }
+                        })
+                    })
+                }
+            })
+        }
+    })
+
+
 }
 
 /*      outcome/
@@ -590,6 +640,38 @@ function createStellarAccount(cfg, acc, funds, src, cb) {
         .catch(cb)
 }
 
+/*      understand/
+ * The stellar network allows us to trade in multiple asset types
+ * (currencies?). In order to signal that we are willing to participate
+ * in a currency, we need to signal that we 'trust' the issuer by
+ * setting up a "trustline" for that issuer and currency.
+ *
+ *      outcome/
+ * Add (or revoke) a trustline to an asset
+ */
+function addTrustline(cfg, revoke, acc, code, issuer, cb) {
+    try {
+        let asset = new StellarSdk.Asset(code, issuer)
+        let svr = new StellarSdk.Server(cfg.HORIZON)
+        let op = { asset : asset }
+        if(revoke) op.limit = "0"
+        svr.loadAccount(acc.pub)
+            .then(ai => {
+                let txn = new StellarSdk.TransactionBuilder(ai)
+                    .addOperation(StellarSdk.Operation.changeTrust(op))
+                    .build()
+                txn.sign(acc._kp)
+                return svr.submitTransaction(txn)
+            })
+            .then(txnres => cb(null, txnres))
+            .catch(cb)
+    } catch(e) {
+        cb(e)
+    }
+}
+
+/*      outcome/
+
 /*      outcome/
  * If there are no existing accounts (and we are verbose) show the user
  * a helpful message. If we are in normal mode, in the tradition of
@@ -736,7 +818,8 @@ where the commands are:
     status [-v] [acc...]: Show status of wallet accounts [optional verbose mode]
     new [-q]: Create a new wallet account (create on stellar using 'create' command)
     create [-q] <account> <funds> <acc>: Create (and fund) an account on stellar using wallet account 'acc'
-    add [-v] <secret>: Import an existing account to the wallet (given the 32-byte 'secret' seed in ed25519)
+    add [-v] <secret>: Import an existing account to the wallet (given the 32-byte ed25519 'secret' seed)
+    trust [-revoke] <acc> <assetCode> <issuer>: Add[Revoke] Trustline for Asset from Issuer
 `)
 }
 
