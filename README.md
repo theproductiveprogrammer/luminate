@@ -67,7 +67,7 @@ This command creates a new account in our wallet.
         new [-q]
 
 The `-q` (quiet) flag suppresses most output. This newly created account
-will be encrypted and safetly stored in the wallet. Because Stellar
+will be encrypted and safety stored in the wallet. Because Stellar
 requires newly created accounts to be funded this account is not created
 on the Stellar network by default. To reflect this into the Stellar
 network use the `create` command (which follows).
