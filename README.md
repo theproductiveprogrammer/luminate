@@ -213,8 +213,12 @@ or simply [add your suggestions](https://github.com/theproductiveprogrammer/lumi
 
 ### Pending Features
 
+* Batch File Support
 * Multi-Signature Support
 * Offer Management
-* Setting options
+* Support Setting Options
 * Mapping Stellar Error Codes
-
+* Modularize File
+* Implement [Whisper](https://github.com/hmatejx/Interstellar-Whisper)
+* Implement account creation and message signing directly so all private
+  operations are easily visible and not hidden in `stellar-api.js` dependency
