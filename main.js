@@ -31,7 +31,7 @@ function loadConfig() {
     if(process.env.KEYSTORE_FOLDER) {
         cfg.KEYSTORE_FOLDER = process.env.KEYSTORE_FOLDER;
     } else {
-        cfg.KEYSTORE_FOLDER = "./stellar-keystore"
+        cfg.KEYSTORE_FOLDER = "./.wallet"
     }
     if(process.env.HORIZON) {
         if(process.env.HORIZON == "LIVE") {
