@@ -22,25 +22,34 @@ function main() {
     do_what_user_asked()
 }
 
+const LIVE_HORIZON = "https://horizon.stellar.org/"
+const TEST_HORIZON = "https://horizon-testnet.stellar.org/"
 /*      outcome/
  * Load the configuration (from environment variables) or defaults
  */
 function loadConfig() {
     let cfg = {};
     cfg.DEBUG = process.env.DEBUG
-    if(process.env.KEYSTORE_FOLDER) {
-        cfg.KEYSTORE_FOLDER = process.env.KEYSTORE_FOLDER;
-    } else {
-        cfg.KEYSTORE_FOLDER = "./.wallet"
-    }
     if(process.env.HORIZON) {
-        if(process.env.HORIZON == "LIVE") {
-            cfg.HORIZON = "https://horizon.stellar.org/"
+        if(process.env.HORIZON == "TEST") {
+            cfg.HORIZON = TEST_HORIZON
+        } else if(process.env.HORIZON == "LIVE") {
+            cfg.HORIZON = LIVE_HORIZON
         } else {
             cfg.HORIZON = process.env.HORIZON
         }
     } else {
-        cfg.HORIZON = "https://horizon-testnet.stellar.org/"
+        cfg.HORIZON = LIVE_HORIZON
+    }
+
+    if(process.env.KEYSTORE_FOLDER) {
+        cfg.KEYSTORE_FOLDER = process.env.KEYSTORE_FOLDER;
+    } else {
+        if(cfg.HORIZON == LIVE_HORIZON) {
+            cfg.KEYSTORE_FOLDER = "./.wallet"
+        } else {
+            cfg.KEYSTORE_FOLDER = "./test-wallet"
+        }
     }
     return cfg;
 }
@@ -52,7 +61,7 @@ function loadConfig() {
  * or stellar public horizon) is unclear.
  */
 function setupStellarNetwork(cfg) {
-    if(cfg.HORIZON == "https://horizon.stellar.org/") {
+    if(cfg.HORIZON == LIVE_HORIZON) {
             StellarSdk.Network.usePublicNetwork()
     } else {
             StellarSdk.Network.useTestNetwork()

@@ -189,18 +189,19 @@ safe to back up in your normal backup locations.
 
 - `HORIZON`
     This is the stellar network to which the wallet connects.
-    _*By default this connects to the TEST network*_ (NOT the LIVE
-    network). In order to connect to the live network this needs to be
-    set to 'LIVE'
-    Defaults to ` https://horizon-testnet.stellar.org/` (TEST NETWORK)
-    Can be set to `LIVE` (will connect to `https://horizon.stellar.org/`)
+    _*By default this connects to the live stellar network*_
+    However, if you would like to play around with the *Test Network*
+    you can set this parameter to `TEST`. This will also switch to using
+    a  test wallet so your accounts don't get mixed up.
+    Defaults to ` https://horizon.stellar.org/` (LIVE NETWORK)
+    Can be set to `TEST` (will connect to `https://horizon-testnet.stellar.org/`)
     or to a specific [Horizon Server](https://www.stellar.org/developers/horizon/reference/index.html)
 
 These parameters can be set as environment variables on the command
 line.
 
 ```
-$ HORIZON=LIVE node . account info GD....
+$ HORIZON=TEST node . account info GD....
 ```
 
 
