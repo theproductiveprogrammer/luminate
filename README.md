@@ -40,6 +40,8 @@ The available commands are:
     add     :   Import an existing account to the wallet
     trust   :   Add/Revoke Trustline
     pay     :   Send payments
+
+    list-assets:   List available assets on the Stellar Network
 ```
 
 *TODO*: Advanced commands (multi-signature, offer management, set options)
@@ -114,6 +116,9 @@ Add or Revoke a
 
         trust [-revoke] <#acc> <assetCode> <issuer>
 
+The `list-assets` command can be used to find the correct asset and
+issuer.
+
 *Example*
 
         ./luminate trust myacc1 CARS GASRAW5RT6GIC47O4XLMGDNEDTG6Y6DJ7QEHACOTZAWISQN6J5BRN5YX
@@ -134,6 +139,22 @@ issuer is provided).
 *Example*
 
         ./luminate GASRAW5RT6GIC47O4XLMGDNEDTG6Y6DJ7QEHACOTZAWISQN6J5BRN5YX myacc1 3.3 CARS
+
+
+7. The `list-assets` Command
+
+List available assets on the Stellar Network
+
+        list-assets
+
+This command lists all available assets along with their issuing
+accounts. This is useful, for example, when we need to set up a
+trustline.
+
+*Example*
+
+        ./luminate list-assets
+
 
 
 ### Specifying Accounts

@@ -91,6 +91,7 @@ function args2UserReq(cfg) {
         { rx: /add/, fn: addAccount },
         { rx: /trust/, fn: manageTrustline },
         { rx: /pay/, fn: sendPayment },
+        { rx: /list-assets/, fn: listAssets },
         { rx: /-h|--help|help/, fn: showHelp },
     ];
 
@@ -265,6 +266,36 @@ function sendPayment(cfg, cmds) {
         })
     }
 }
+
+/*      outcome/
+ * Show the assets along with their issuers
+ */
+function listAssets(cfg, cmds) {
+    let svr = new StellarSdk.Server(cfg.HORIZON)
+    svr.assets()
+        .call()
+        .then(show_asset_1)
+        .catch(show_err_1)
+
+    function show_asset_1(a) {
+        if(a.records) {
+            for(let i = 0;i < a.records.length;i++) {
+                let rec = a.records[i]
+                u.showMsg(`${rec.asset_issuer} ${rec.asset_code}`)
+            }
+        }
+        if(a.next) {
+            a.next()
+            .then(show_asset_1)
+            .catch(show_err_1)
+        }
+    }
+
+    function show_err_1(err) {
+        u.showErr(err)
+    }
+}
+
 
 /*      outcome/
  * Add/revoke trustlines to a wallet account depending on what the user
@@ -1018,6 +1049,8 @@ where the commands are:
     trust   :   Add/Revoke Trustline
     pay     :   Send payments
 
+    list-assets:   List available assets on Stellar
+
     help    :   Show this help
 
 Parameter reference:
@@ -1027,6 +1060,7 @@ Parameter reference:
     add [-v] <secret>
     trust [-revoke] <#acc> <assetCode> <issuer>
     pay [-v] <dest> <#acc> <amount> <assetCode> [issuer]
+    list-assets
 
 (Refer to the README/Manual for more details)
 
