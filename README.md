@@ -175,10 +175,10 @@ two simple methods for selecting them:
 All the above select the same account in the wallet
 
 
-## Connecting to the live network
-By default `Luminate` now connects to the 'stellar *test* network' by
-default. Please set the `HORIZON` parameter to `LIVE` in order to
-connect to the live network.
+## Connecting to the test network
+`Luminate` now connects to the 'stellar *live* network' by default.
+Please set the `HORIZON` parameter to `TEST` in order to connect to the
+test network.
 
 ```
 $ HORIZON=LIVE node . account info GD....
