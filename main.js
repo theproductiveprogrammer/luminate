@@ -18,6 +18,7 @@ const chalk = require('chalk')
  * Our modules
  */
 const showhelp = require('./help')
+const showinfo = require('./info')
 
 /*      understand/
  * We export the `main` function that runs `luminate` as a command line
@@ -28,7 +29,8 @@ module.exports = main
 function main() {
     const cfg = getConfiguration()
     const op = setupOutput(cfg)
-    showhelp(cfg, op)
+    const user_request = args2UserReq(cfg)
+    user_request(cfg, op)
 }
 
 /*      outcome/
@@ -72,9 +74,10 @@ function setupOutput(cfg) {
             let lines = txt.split('\n')
             let rows = op.rows - 5 // Keep a buffer for multi-line prompts and overflows
             if(lines.length < rows) {
-                console.log(txt)
+                return console.log(txt)
+            } else {
+                show_lines_from_1(0)
             }
-            show_lines_from_1(0)
 
             function show_lines_from_1(ndx) {
                 console.log(lines.slice(ndx,ndx+rows).join('\n'))
@@ -109,6 +112,50 @@ function setupOutput(cfg) {
     function setup_chalk_1() {
         if(cfg.noColor || cfg.asScript) chalk.enabled = false
         return chalk
+    }
+}
+
+/*      problem/
+ * The user wants to ask us to somethings with different parameters
+ *
+ *      understand/
+ * `process.argv` contains an array with
+ *  a) The path to Nodejs binary
+ *  b) The path to the javascript file being executed
+ *  c) Additional user arguments...
+ *
+ *      way/
+ * We get rid of the path to nodejs and the file being executed and look
+ * to see if we understand the first command. If we do, we pass the rest
+ * of the arguments to the command. If we don't understand, we return a
+ * function that informs the user that we don't.
+ */
+function args2UserReq(cfg, op) {
+    const argmap = [
+        { rx: /^(version|ver|-v|-ver|--version|--ver)$/, fn: showinfo },
+        { rx: /^(-h|--help|help)$/, fn: showhelp },
+    ];
+
+    process.argv.shift()
+    process.argv.shift()
+
+    let cmd = process.argv[0]
+    if(!cmd) return with_args_1(showhelp)
+
+    process.argv.shift()
+    for(let i = 0;i < argmap.length;i++) {
+        if(cmd.match(argmap[i].rx)) {
+            return with_args_1(argmap[i].fn)
+        }
+    }
+    return with_args_1(did_not_understand_1)
+
+    function with_args_1(fn) {
+        return (cfg, op) => fn(cfg, process.argv, op, cmd)
+    }
+
+    function did_not_understand_1(cfg, args, op, cmd) {
+        op.out(op.chalk`{blue Did not understand:} '{gray ${cmd}}'`)
     }
 }
 

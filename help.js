@@ -5,7 +5,7 @@ module.exports = showHelp
 /*      outcome/
  * Show help message
  */
-function showHelp(cfg, op) {
+function showHelp(cfg, args, op) {
     op.out(op.chalk`
             {bold.red *Luminate*}
     {underline.gray Command-line wallet for Stellar}
