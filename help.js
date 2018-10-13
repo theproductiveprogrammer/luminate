@@ -67,7 +67,7 @@ You can export your account out of luminate by exposing the {magenta.bold SECRET
 
 You can make payments from {red Luminate}:
 
-    {red ./luminate} {green pay} {bold --from} myFirstAccount {bold --amt} XML:12.345 GBHEJM54VIBM6GPC5FZTD7A4O5VZCZAUOYSEIQUXKWJMHL3QMUOJHKHR
+    {red ./luminate} {green pay} {bold --from} myFirstAccount {bold --amt} XLM:12.345 GBHEJM54VIBM6GPC5FZTD7A4O5VZCZAUOYSEIQUXKWJMHL3QMUOJHKHR
 
 
 

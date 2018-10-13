@@ -25,32 +25,55 @@ function list(wallet, cb) {
     fs.readdir(wallet, 'utf8', (err, files) => {
         if(err) cb(err)
         else {
-            let accs = []
-            let errs = []
-            for(let i = 0;i < files.length;i++) {
-                let m = files[i].match(/(.*)-(.*)-(.*)\.stellar/)
-                if(!m) errs.push(files[i])
-                else {
-                    let name = m[1]
-                    let pub = m[2]
-                    let crc = m[3]
-
-                    try {
-                        let validate = crcPublic(pub)
-                        if(crc != crcPublic(pub)) errs.push(files[i])
-                        else accs.push({
-                            name: m[1],
-                            pub: m[2],
-                        })
-                    } catch(e) {
-                        errs.push(files[i])
-                    }
-
-                }
+            let accum = {
+                accs: [],
+                errs: [],
             }
-            cb(null, accs, errs)
+            load_accs_1(files, 0, accum)
         }
     })
+
+    /*      outcome/
+     * Recursively load each file into `accs`, failing which put
+     * it into the `errs`.
+     */
+    function load_accs_1(files, ndx, accum) {
+        if(ndx >= files.length) return cb(null, accum.accs, accum.errs)
+        let file = files[ndx]
+        let m = file.match(/(.*)-(.*)-(.*)\.stellar/)
+        if(!m) {
+            accum.errs.push(file)
+            load_accs_1(files, ndx+1, accum)
+        } else {
+            let name = m[1]
+            let pub = m[2]
+            let crc = m[3]
+            if(crc != crcPublic(pub)) {
+                accum.errs.push(file)
+                load_accs_1(files, ndx+1, accum)
+            } else {
+                fs.readFile(path.join(wallet,file), 'utf8', (err, data) => {
+                    if(err) {
+                        accum.errs.push(file)
+                        load_accs_1(files, ndx+1, accum)
+                    } else {
+                        try {
+                            data = JSON.parse(data)
+                            accum.accs.push({
+                                name: name,
+                                pub: pub,
+                                data: data,
+                            })
+                            load_accs_1(files, ndx+1, accum)
+                        } catch(e) {
+                            accum.errs.push(file)
+                            load_accs_1(files, ndx+1, accum)
+                        }
+                    }
+                })
+            }
+        }
+    }
 }
 
 const LIVE_HORIZON = "https://horizon.stellar.org/"
@@ -92,8 +115,8 @@ function status(wallet, hz, acc, cb) {
 }
 
 /*      outcome/
- * Returns the public key for the given account - either a mapping of a
- * wallet account or the actual key itself.
+ * Returns the public key for the given account - along with the wallet
+ * name if that was provided.
  */
 function getPub(wallet, acc, cb) {
     list(wallet, (err, accs) => {
@@ -192,6 +215,7 @@ const latestScryptOptions = {
     encoding: 'binary'
 };
 function password2key(salt, password, cb) {
+    if(!password) return cb(`Password not provided`)
     scrypt.hash(password, latestScryptOptions, nacl.secretbox.keyLength, salt, cb)
 }
 
@@ -212,41 +236,9 @@ function saveWalletAccount(wallet, account, cb) {
  * Create a CRC of the public key so it's not easy to tamper with.
  */
 function crcPublic(pub) {
-    return base32.encode(StellarSdk.StrKey.decodeEd25519PublicKey(pub))
-}
-
-/*      problem/
- * We have a serialized string that contains object information. Like
- * all objects we now have a problem bringing them 'to life' (JSON
- * doesn't understand our object types).
- *
- *      way/
- * We recognize 'Buffer' types and convert them during the parse cycle.
- * Then we create a `StellarSdk.Keypair` using our internal keypair to
- * create the appropriate object. Then we use `Object.assign` to replace
- * all it's internal fields with the data from our de-serialized object
- * which (hopefully) keeps it a valid `StellarSdk.Keypair` but
- * containing our data.
- */
-function str2Keypair(str) {
-    let kp_ = JSON.parse(str, (k, v) => {
-            if (
-                v !== null            &&
-                typeof v === 'object' &&
-                'type' in v           &&
-                v.type === 'Buffer'   &&
-                'data' in v           &&
-                Array.isArray(v.data)) {
-                return Buffer.from(v.data);
-            }
-            return v;
-    })
-    let kp = new StellarSdk.Keypair({
-        type: 'ed25519',
-        publicKey: kp_._publicKey,
-    })
-
-    return Object.assign(kp, kp_)
+    try {
+        return base32.encode(StellarSdk.StrKey.decodeEd25519PublicKey(pub))
+    } catch(e) {}
 }
 
 function createNonce() {

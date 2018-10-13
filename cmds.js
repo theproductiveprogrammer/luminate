@@ -9,7 +9,6 @@ module.exports = {
 }
 
 function status(cfg, args, op) {
-    let acc
     if(args.length == 1) return show_status_1([args[0]], 0)
     else {
         luminate.list(cfg.wallet_dir, (err, accs) => {
