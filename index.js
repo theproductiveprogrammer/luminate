@@ -19,6 +19,19 @@ module.exports = {
     create: create,
     list: list,
     status: status,
+    pay: pay,
+}
+
+function pay(pw, wallet, hz, from, amt, to, cb) {
+    let svr = getSvr(hz)
+    if(!from) cb(`No account provided`)
+
+    getSecret(wallet, pw, from, (err, secret, account) => {
+        if(err) cb(err)
+        else {
+            cb(`secret: ${secret}, account: ${JSON.stringify(account, null, 2)}`)
+        }
+    })
 }
 
 function list(wallet, cb) {
@@ -129,6 +142,40 @@ function getPub(wallet, acc, cb) {
             cb(null, null, acc)
         }
     })
+}
+
+/*      outcome/
+ * Returns the private key for the given account
+ */
+function getSecret(wallet, pw, acc, cb) {
+    list(wallet, (err, accs) => {
+        if(err) cb(err)
+        else {
+            for(let i = 0;i < accs.length;i++) {
+                let acc_ = accs[i]
+                if(acc_.name == acc) return send_secret_1(acc_.data)
+            }
+            cb(`Account ${acc} not found in wallet`)
+        }
+    })
+
+    function send_secret_1(account) {
+        password2key(account.salt, pw, (err, key) => {
+            if(err) cb(err)
+            else {
+                let secret = decode(account.secret, account.nonce, key)
+                if(!secret) cb(`Incorrect password`)
+                else {
+                    try {
+                        account._kp = StellarSdk.Keypair.fromSecret(secret)
+                        cb(null, secret, account)
+                    } catch(e) {
+                        cb(e)
+                    }
+                }
+            }
+        })
+    }
 }
 
 function create(pw, wallet, from, amt, name, cb) {

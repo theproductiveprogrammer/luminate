@@ -6,6 +6,44 @@ module.exports = {
     create: create,
     list: list,
     status: status,
+    pay: pay,
+}
+
+function pay(cfg, args, op) {
+    let p = loadParams(args)
+    let to = p._rest[0]
+    if(!to) return op.err(op.chalk`{red.bold Error:} No destination for payment`)
+
+    if(p._rest.length > 1) return err_too_many_1()
+
+    if(!p.from) return op.err(op.chalk`{red.bold Error:} Specify wallet account name to pay '{green --from}'`)
+    if(!p.amt) return op.err(op.chalk`{red.bold Error:} Specify '{green --amt}' to pay`)
+
+    let a = p.amt.split(':')
+    if(a.length != 2) return op.err(op.chalk`{red.bold Error:} Specify amount like this {bold XLM:{red 12.455}}`)
+    let asset = a[0]
+    let amt = a[1]
+
+    op.out(op.chalk`Paying {bold.blue ${amt} ${asset}} from {red ${p.from}} to {green ${to}}`)
+
+    withPassword(cfg, (pw) => {
+        luminate.pay(
+            pw,
+            cfg.wallet_dir,
+            cfg.horizon,
+            p.from,
+            p.amt,
+            to,
+            (err) => {
+                if(err) op.err(err)
+                else op.out(op.chalk`{bold Paid}`)
+            })
+    })
+
+    function err_too_many_1() {
+        let dests = p._rest.map(n => `"${n}"`).join(", ")
+        op.err(op.chalk`{red.bold Error:} Too many destinations: {green ${dests}}`)
+    }
 }
 
 function status(cfg, args, op) {

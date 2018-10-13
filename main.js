@@ -159,6 +159,7 @@ function args2UserReq(cfg, op) {
         { rx: /^create$/, fn: cmds.create },
         { rx: /^list$/, fn: cmds.list },
         { rx: /^status$/, fn: cmds.status },
+        { rx: /^pay$/, fn: cmds.pay },
         { rx: /^(version|ver|-v|-ver|--version|--ver)$/, fn: showinfo },
         { rx: /^(-h|--help|help)$/, fn: showhelp },
     ];
