@@ -19,6 +19,7 @@ const chalk = require('chalk')
  */
 const showhelp = require('./help')
 const showinfo = require('./info')
+const cmds = require('./cmds')
 
 /*      understand/
  * We export the `main` function that runs `luminate` as a command line
@@ -34,12 +35,25 @@ function main() {
 }
 
 /*      outcome/
- * Gets the configuration from environment variables. See also `dotenv`.
+ * Gets the configuration from environment variables.
+ * Note that we only set the wallet password IF we are running "as a
+ * script".
+ *
+ * See also `dotenv`.
  */
 function getConfiguration() {
     let cfg = {}
     if(process.env.LM__NO_COLOR) cfg.noColor = true
     if(process.env.LM__AS_SCRIPT) cfg.asScript = true
+    if(cfg.asScript && process.env.LM__WALLET_PASSWORD) {
+        cfg.wallet_pw = process.env.LM__WALLET_PASSWORD
+    }
+    if(process.env.LM__WALLET_FOLDER) {
+        cfg.wallet_dir = process.env.LM__WALLET_FOLDER
+    } else {
+        cfg.wallet_dir = './.wallet'
+    }
+
     return cfg
 }
 
@@ -134,6 +148,7 @@ function setupOutput(cfg) {
  */
 function args2UserReq(cfg, op) {
     const argmap = [
+        { rx: /^create$/, fn: cmds.create },
         { rx: /^(version|ver|-v|-ver|--version|--ver)$/, fn: showinfo },
         { rx: /^(-h|--help|help)$/, fn: showhelp },
     ];

@@ -93,7 +93,7 @@ They can also be set in a file called "{bold .env}".
     {magenta LM__NO_COLOR}          :   Output plain text
                               {gray (no color or format)}
     {magenta LM__WALLET_PASSWORD}   :   Password for wallet account used
-                              {gray (useful for running multiple commands in a batch)}
+                              {gray (only valid in scripts: "LM__AS_SCRIPT" must be set)}
     {magenta LM__WALLET_FOLDER}     :   Path to wallet folder
                               {gray (defaults to {bold.black .wallet/})}
     {magenta LM__HORIZON}           :   Horizon server to use
