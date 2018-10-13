@@ -1,11 +1,13 @@
 {
   "name": "luminate",
-  "version": "0.1.0",
-  "description": "A command line interface for Stellar",
+  "version": "1.0.0",
+  "description": "A Scriptable wallet for Stellar Cryptocurrency",
   "main": "luminate",
   "author": "charles.lobo@gmail.com",
   "license": "MIT",
   "dependencies": {
+    "chalk": "^2.4.1",
+    "dotenv": "^6.1.0",
     "read": "^1.0.7",
     "scrypt": "^6.0.3",
     "stellar-sdk": "^0.10.3",
