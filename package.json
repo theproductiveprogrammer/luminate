@@ -6,6 +6,7 @@
   "author": "charles.lobo@gmail.com",
   "license": "MIT",
   "dependencies": {
+    "base32": "^0.0.6",
     "chalk": "^2.4.1",
     "dotenv": "^6.1.0",
     "read": "^1.0.7",

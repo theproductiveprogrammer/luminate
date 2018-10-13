@@ -149,6 +149,7 @@ function setupOutput(cfg) {
 function args2UserReq(cfg, op) {
     const argmap = [
         { rx: /^create$/, fn: cmds.create },
+        { rx: /^list$/, fn: cmds.list },
         { rx: /^(version|ver|-v|-ver|--version|--ver)$/, fn: showinfo },
         { rx: /^(-h|--help|help)$/, fn: showhelp },
     ];

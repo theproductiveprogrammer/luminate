@@ -40,6 +40,9 @@ using:
 
     {red ./luminate} {green.bold create} {bold --from} myFirstAccount {bold --amt} 2 secondAccount
 
+After adding a few accounts to your wallet, you can list all of them:
+
+    {red ./luminate} {green.bold list}
 
 
 You can check the status of your account on Stellar using:

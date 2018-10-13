@@ -7,6 +7,7 @@ const StellarSdk = require('stellar-sdk')
 const nacl = require('tweetnacl')
 const naclUtil = require('tweetnacl-util')
 const scrypt = require('scrypt')
+const base32 = require('base32')
 
 const path = require('path')
 const fs = require('fs')
@@ -16,6 +17,39 @@ const fs = require('fs')
  */
 module.exports = {
     create: create,
+    list: list,
+}
+
+function list(wallet, cb) {
+    fs.readdir(wallet, 'utf8', (err, files) => {
+        if(err) cb(err)
+        else {
+            let accs = []
+            let errs = []
+            for(let i = 0;i < files.length;i++) {
+                let m = files[i].match(/(.*)-(.*)-(.*)\.stellar/)
+                if(!m) errs.push(files[i])
+                else {
+                    let name = m[1]
+                    let pub = m[2]
+                    let crc = m[3]
+
+                    try {
+                        let validate = crcPublic(pub)
+                        if(crc != crcPublic(pub)) errs.push(files[i])
+                        else accs.push({
+                            name: m[1],
+                            pub: m[2],
+                        })
+                    } catch(e) {
+                        errs.push(files[i])
+                    }
+
+                }
+            }
+            cb(null, accs, errs)
+        }
+    })
 }
 
 function create(pw, wallet, from, amt, name, cb) {
@@ -108,12 +142,20 @@ function password2key(salt, password, cb) {
 /*      outcome/
  * Save the current account to the wallet in a file with the following
  * format:
- *      <Name>-<Public Key>.stellar
+ *      <Name>-<Public Key>-<crc>.stellar
  */
-function saveWalletAccount(wallet, secret, cb) {
-    let fname = `${secret.label}-${secret.pub}.stellar`
+function saveWalletAccount(wallet, account, cb) {
+    let crc = crcPublic(account.pub)
+    let fname = `${account.label}-${account.pub}-${crc}.stellar`
     let p = path.join(wallet, fname)
-    fs.writeFile(p, JSON.stringify(secret,null,2), 'utf-8', cb)
+    fs.writeFile(p, JSON.stringify(account,null,2), 'utf-8', cb)
+}
+
+/*      outcome/
+ * Create a CRC of the public key so it's not easy to tamper with.
+ */
+function crcPublic(pub) {
+    return base32.encode(StellarSdk.StrKey.decodeEd25519PublicKey(pub))
 }
 
 /*      problem/

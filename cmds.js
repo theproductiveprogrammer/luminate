@@ -4,6 +4,26 @@ const luminate = require('./index')
 
 module.exports = {
     create: create,
+    list: list,
+}
+
+function list(cfg, args, op) {
+    luminate.list(cfg.wallet_dir, (err, accs, errs) => {
+        if(err) op.err(err)
+        else {
+            for(let i = 0;i < accs.length;i++) {
+                let name = accs[i].name
+                let pub = accs[i].pub
+                op.out(op.chalk`{bold ${name}} {gray ${pub}}`)
+            }
+            if(errs && errs.length && !cfg.asScript) {
+                op.err(op.chalk`\n{red.bold Did not understand files:}`)
+                for(let i = 0;i < errs.length;i++) {
+                    op.err(op.chalk`  {underline ${errs[i]}}`)
+                }
+            }
+        }
+    })
 }
 
 function create(cfg, args, op) {
