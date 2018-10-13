@@ -1,4 +1,8 @@
 'use strict'
+
+/*      section/
+ * Import all the things!
+ */
 const StellarSdk = require('stellar-sdk')
 const nacl = require('tweetnacl')
 const naclUtil = require('tweetnacl-util')
@@ -7,6 +11,9 @@ const scrypt = require('scrypt')
 const path = require('path')
 const fs = require('fs')
 
+/*      understand/
+ * Provide functionality from this module
+ */
 module.exports = {
     create: create,
 }
@@ -25,27 +32,25 @@ function create(pw, wallet, from, amt, name, cb) {
     })
 
     /*      outcome/
-     * Create a `secret` structure that holds account information in the
+     * Create a structure that holds account information in the
      * wallet. Encrypt this by generating a key from the user's
      * password.
      */
     function create_account_1(kp, name, password, wallet, cb) {
-        let serial = keypair2Str(kp)
-        let secret = {
+        let account = {
             label: name,
             pub: kp.publicKey(),
             pkg: 'tweetnacl',
             nonce: createNonce(),
             salt: createSalt(),
         }
-        password2key(secret.salt, password, (err, key) => {
+        password2key(account.salt, password, (err, key) => {
             if(err) cb(err)
             else {
-                let enc = encode(serial, secret.nonce, key)
-                secret.keypair = enc
-                saveSecret(wallet, secret, (err) => {
+                account.secret = encode(kp.secret(), account.nonce, key)
+                saveWalletAccount(wallet, account, (err) => {
                     if(err) cb(err)
-                    else cb(null, secret.pub)
+                    else cb(null, account.pub)
                 })
             }
 
@@ -101,11 +106,11 @@ function password2key(salt, password, cb) {
 }
 
 /*      outcome/
- * Save the current secret to the wallet in a file with the following
+ * Save the current account to the wallet in a file with the following
  * format:
  *      <Name>-<Public Key>.stellar
  */
-function saveSecret(wallet, secret, cb) {
+function saveWalletAccount(wallet, secret, cb) {
     let fname = `${secret.label}-${secret.pub}.stellar`
     let p = path.join(wallet, fname)
     fs.writeFile(p, JSON.stringify(secret,null,2), 'utf-8', cb)
@@ -143,13 +148,6 @@ function str2Keypair(str) {
     })
 
     return Object.assign(kp, kp_)
-}
-
-/*      outcome/
- * Convert the keypair to a string by JSON-encoding it.
- */
-function keypair2Str(kp) {
-    return JSON.stringify(kp)
 }
 
 function createNonce() {
