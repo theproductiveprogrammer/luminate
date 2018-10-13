@@ -117,7 +117,7 @@ function status(cfg, args, op) {
 
 function pay(cfg, args, op) {
     const errmsg = {
-        NODEST: op.chalk`{red.bold Error:} Specify destination for payment`,
+        NODEST: op.chalk`{red.bold Error:} Specify payment {green --to}`,
         NOFROM: op.chalk`{red.bold Error:} Specify wallet account name to pay '{green --from}'`,
         NOAMT: op.chalk`{red.bold Error:} Specify '{green --amt}' to pay`,
         BADAMTFMT: op.chalk`{red.bold Error:} Specify amount like this {bold XLM:{red 12.455}}`,
@@ -126,8 +126,7 @@ function pay(cfg, args, op) {
     }
 
     let p = loadParams(args)
-    let to = p._rest[0]
-    if(!to) return op.err(errmsg.NODEST)
+    if(!p.to) return op.err(errmsg.NODEST)
 
     if(p._rest.length > 1) return err_too_many_1()
 
@@ -139,10 +138,10 @@ function pay(cfg, args, op) {
     let asset = a[0]
     let amt = a[1]
 
-    op.out(op.chalk`Paying {bold.blue ${amt} ${asset}} from {red ${p.from}} to {green ${to}}`)
+    op.out(op.chalk`Paying {bold.blue ${amt} ${asset}} from {red ${p.from}} to {green ${p.to}}`)
 
-    withAccount(cfg, to, (err, to_) => {
-        if(err) return op.err(errmsg.BADDEST(to))
+    withAccount(cfg, p.to, (err, to) => {
+        if(err) return op.err(errmsg.BADDEST(p.to))
         else {
             luminate.wallet.find(cfg.wallet_dir, p.from, (err, from) => {
                 if(err) return op.err(err)
@@ -154,7 +153,7 @@ function pay(cfg, args, op) {
                             else {
                                 luminate.stellar.pay(
                                     cfg.horizon,
-                                    from_, amt, to_,
+                                    from_, asset, amt, to,
                                     (err) => {
                                         if(err) return op.err(err)
                                         else op.out(op.chalk`{bold Paid}`)

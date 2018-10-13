@@ -38,7 +38,7 @@ funds into it using an already active account and you're ready to go.
 If you have an active account, you can now do this all in one step in {red Luminate}
 using:
 
-    {red ./luminate} {green.bold create} {bold --from} myFirstAccount {bold --amt} 2 secondAccount
+    {red ./luminate} {green.bold create} {bold --from} myFirstAccount {bold --amt} 2 secondAccount [TODO]
 
 After adding a few accounts to your wallet, you can list all of them:
 
@@ -67,7 +67,7 @@ You can export your account out of luminate by exposing the {magenta.bold SECRET
 
 You can make payments from {red Luminate}:
 
-    {red ./luminate} {green pay} {bold --from} myFirstAccount {bold --amt} XLM:12.345 GBHEJM54VIBM6GPC5FZTD7A4O5VZCZAUOYSEIQUXKWJMHL3QMUOJHKHR
+    {red ./luminate} {green pay} {bold --from} myFirstAccount {bold --amt} XLM:12.345 --to GBHEJM54VIBM6GPC5FZTD7A4O5VZCZAUOYSEIQUXKWJMHL3QMUOJHKHR
 
 
 
