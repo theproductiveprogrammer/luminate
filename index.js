@@ -18,6 +18,7 @@ const fs = require('fs')
 module.exports = {
     create: create,
     list: list,
+    status: status,
 }
 
 function list(wallet, cb) {
@@ -48,6 +49,61 @@ function list(wallet, cb) {
                 }
             }
             cb(null, accs, errs)
+        }
+    })
+}
+
+const LIVE_HORIZON = "https://horizon.stellar.org/"
+const TEST_HORIZON = "https://horizon-testnet.stellar.org/"
+function getSvr(horizon) {
+    if(horizon == 'live') {
+        StellarSdk.Network.usePublicNetwork()
+        return new StellarSdk.Server(LIVE_HORIZON)
+    } else {
+        StellarSdk.Network.useTestNetwork()
+        return new StellarSdk.Server(TEST_HORIZON)
+    }
+}
+
+function status(wallet, hz, acc, cb) {
+    let svr = getSvr(hz)
+    if(!acc) cb(`No account provided`)
+
+    getPub(wallet, acc, (err, name, pub) => {
+        if(err) cb(err)
+        else {
+            svr.loadAccount(pub)
+                .then(ai => cb(null, wn_1(ai)))
+                .catch(err => {
+                    if(err.response && err.response.status == 404) {
+                        cb(null, wn_1({ id: pub }))
+                    } else {
+                        cb(err)
+                    }
+                })
+
+
+            function wn_1(o) {
+                if(name) o._name = name
+                return o
+            }
+        }
+    })
+}
+
+/*      outcome/
+ * Returns the public key for the given account - either a mapping of a
+ * wallet account or the actual key itself.
+ */
+function getPub(wallet, acc, cb) {
+    list(wallet, (err, accs) => {
+        if(err) cb(err)
+        else {
+            for(let i = 0;i < accs.length;i++) {
+                let acc_ = accs[i]
+                if(acc_.name == acc) return cb(null, acc_.name, acc_.pub)
+            }
+            cb(null, null, acc)
         }
     })
 }

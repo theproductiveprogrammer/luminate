@@ -43,8 +43,10 @@ function main() {
  */
 function getConfiguration() {
     let cfg = {}
+
     if(process.env.LM__NO_COLOR) cfg.noColor = true
     if(process.env.LM__AS_SCRIPT) cfg.asScript = true
+
     if(cfg.asScript && process.env.LM__WALLET_PASSWORD) {
         cfg.wallet_pw = process.env.LM__WALLET_PASSWORD
     }
@@ -52,6 +54,12 @@ function getConfiguration() {
         cfg.wallet_dir = process.env.LM__WALLET_FOLDER
     } else {
         cfg.wallet_dir = './.wallet'
+    }
+
+    if(process.env.LM__HORIZON == 'TEST') {
+        cfg.horizon = 'test'
+    } else {
+        cfg.horizon = 'live'
     }
 
     return cfg
@@ -150,6 +158,7 @@ function args2UserReq(cfg, op) {
     const argmap = [
         { rx: /^create$/, fn: cmds.create },
         { rx: /^list$/, fn: cmds.list },
+        { rx: /^status$/, fn: cmds.status },
         { rx: /^(version|ver|-v|-ver|--version|--ver)$/, fn: showinfo },
         { rx: /^(-h|--help|help)$/, fn: showhelp },
     ];

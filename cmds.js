@@ -5,7 +5,49 @@ const luminate = require('./index')
 module.exports = {
     create: create,
     list: list,
+    status: status,
 }
+
+function status(cfg, args, op) {
+    let acc
+    if(args.length == 1) return show_status_1([args[0]], 0)
+    else {
+        luminate.list(cfg.wallet_dir, (err, accs) => {
+            if(err) op.err(err)
+            else show_status_1(accs.map(a => a.name), 0)
+        })
+    }
+
+    function show_status_1(accs, ndx) {
+        if(ndx >= accs.length) return
+
+        luminate.status(cfg.wallet_dir, cfg.horizon, accs[ndx], (err, ai) => {
+            if(err) op.err(err)
+            else {
+                if(ai._name) op.out(op.chalk`{bold Account:} {green ${ai._name}}`)
+                else op.out(op.chalk`{bold Account:} {green ${ai.id}}`)
+                op.out(JSON.stringify(publicVals(ai),null,2))
+            }
+            show_status_1(accs, ndx+1)
+        })
+    }
+}
+
+/*      outcome/
+ * Create a duplicate object that contains only the public values of the
+ * given object (ignore functions and `_private` values)
+ */
+function publicVals(o) {
+    let pv = {}
+    for(let k in o) {
+        if(!o.hasOwnProperty(k)) continue
+        if(k.startsWith('_')) continue
+        if(typeof o[k] === 'function') continue
+        pv[k] = o[k]
+    }
+    return pv
+}
+
 
 function list(cfg, args, op) {
     luminate.list(cfg.wallet_dir, (err, accs, errs) => {
