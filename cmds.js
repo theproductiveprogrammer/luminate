@@ -63,21 +63,22 @@ function withPassword(cfg, cb) {
 function loadParams(args) {
     let p = {}
     let rest = []
-    let val;
-    for(let i = 0;i < args.length;i++) {
-        let arg = args[i]
-        let m = arg.match(/^-+(.*)/)
-        if(m) {
-            p[m[1]] = true // value is present
-            val = m[1] // load next item as value
-        } else if(val) {
-            p[val] = arg
-            val = false;
-        } else {
-            rest.push(arg)
+    if(args && args.length) {
+        let val;
+        for(let i = 0;i < args.length;i++) {
+            let arg = args[i]
+            let m = arg.match(/^-+(.*)/)
+            if(m) {
+                p[m[1]] = true // value is present
+                val = m[1] // load next item as value
+            } else if(val) {
+                p[val] = arg
+                val = false;
+            } else {
+                rest.push(arg)
+            }
         }
     }
-
     p._rest = rest
     return p
 }
