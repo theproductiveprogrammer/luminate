@@ -1,7 +1,22 @@
 'use strict'
+
+/*      section/
+ * Import all the functionality we need
+ */
 const read = require('read')
+const StellarSdk = require('stellar-sdk')
+
+/*      section/
+ * Use our modules
+ */
 const luminate = require('./index')
 
+
+/*      understand/
+ * This module handles user requests from the command line by combining
+ * the wallet functionality and the stellar functionality to do useful
+ * work and respond to the user.
+ */
 module.exports = {
     create: create,
     list: list,
@@ -9,85 +24,34 @@ module.exports = {
     pay: pay,
 }
 
-function pay(cfg, args, op) {
+function create(cfg, args, op) {
     let p = loadParams(args)
-    let to = p._rest[0]
-    if(!to) return op.err(op.chalk`{red.bold Error:} No destination for payment`)
+    let name = p._rest[0]
+    if(!name) return err_no_name_1()
 
     if(p._rest.length > 1) return err_too_many_1()
 
-    if(!p.from) return op.err(op.chalk`{red.bold Error:} Specify wallet account name to pay '{green --from}'`)
-    if(!p.amt) return op.err(op.chalk`{red.bold Error:} Specify '{green --amt}' to pay`)
-
-    let a = p.amt.split(':')
-    if(a.length != 2) return op.err(op.chalk`{red.bold Error:} Specify amount like this {bold XLM:{red 12.455}}`)
-    let asset = a[0]
-    let amt = a[1]
-
-    op.out(op.chalk`Paying {bold.blue ${amt} ${asset}} from {red ${p.from}} to {green ${to}}`)
+    op.out(op.chalk`Creating account "{green.bold ${name}}"`)
 
     withPassword(cfg, (pw) => {
-        luminate.pay(
-            pw,
-            cfg.wallet_dir,
-            cfg.horizon,
-            p.from,
-            p.amt,
-            to,
-            (err) => {
+        luminate.wallet.create(pw, cfg.wallet_dir, name, (err, acc) => {
                 if(err) op.err(err)
-                else op.out(op.chalk`{bold Paid}`)
-            })
+                else op.out(op.chalk`{grey ${acc}}`)
+        })
     })
 
+    function err_no_name_1() {
+        op.err(op.chalk`{red.bold Error:} Please provide a name`)
+    }
+
     function err_too_many_1() {
-        let dests = p._rest.map(n => `"${n}"`).join(", ")
-        op.err(op.chalk`{red.bold Error:} Too many destinations: {green ${dests}}`)
+        let names = p._rest.map(n => `"${n}"`).join(", ")
+        op.err(op.chalk`{red.bold Error:} Too many names for account: {green ${names}}`)
     }
 }
-
-function status(cfg, args, op) {
-    if(args.length == 1) return show_status_1([args[0]], 0)
-    else {
-        luminate.list(cfg.wallet_dir, (err, accs) => {
-            if(err) op.err(err)
-            else show_status_1(accs.map(a => a.name), 0)
-        })
-    }
-
-    function show_status_1(accs, ndx) {
-        if(ndx >= accs.length) return
-
-        luminate.status(cfg.wallet_dir, cfg.horizon, accs[ndx], (err, ai) => {
-            if(err) op.err(err)
-            else {
-                if(ai._name) op.out(op.chalk`{bold Account:} {green ${ai._name}}`)
-                else op.out(op.chalk`{bold Account:} {green ${ai.id}}`)
-                op.out(JSON.stringify(publicVals(ai),null,2))
-            }
-            show_status_1(accs, ndx+1)
-        })
-    }
-}
-
-/*      outcome/
- * Create a duplicate object that contains only the public values of the
- * given object (ignore functions and `_private` values)
- */
-function publicVals(o) {
-    let pv = {}
-    for(let k in o) {
-        if(!o.hasOwnProperty(k)) continue
-        if(k.startsWith('_')) continue
-        if(typeof o[k] === 'function') continue
-        pv[k] = o[k]
-    }
-    return pv
-}
-
 
 function list(cfg, args, op) {
-    luminate.list(cfg.wallet_dir, (err, accs, errs) => {
+    luminate.wallet.list(cfg.wallet_dir, (err, accs, errs) => {
         if(err) op.err(err)
         else {
             for(let i = 0;i < accs.length;i++) {
@@ -105,36 +69,137 @@ function list(cfg, args, op) {
     })
 }
 
-function create(cfg, args, op) {
+function status(cfg, args, op) {
+    if(args.length == 1) {
+        luminate.wallet.find(cfg.wallet_dir, args[0], (err, acc) => {
+            if(err) op.err(err)
+            else if(!acc) op.err(op.chalk`{bold.red Error:} "${args[0]}" is not a valid account`)
+            else show_status_1([acc], 0)
+        })
+    } else {
+        luminate.wallet.list(cfg.wallet_dir, (err, accs) => {
+            if(err) op.err(err)
+            else show_status_1(accs, 0)
+        })
+    }
+
+    function show_status_1(accs, ndx) {
+        if(ndx >= accs.length) return
+        let acc = accs[ndx]
+
+        luminate.stellar.status(cfg.horizon, acc, (err, ai) => {
+            if(err) op.err(err)
+            else {
+                if(acc.name) op.out(op.chalk`{bold Account:} {green ${acc.name}}`)
+                else op.out(op.chalk`{bold Account:} {green ${acc.id}}`)
+                op.out(JSON.stringify(public_vals_1(ai),null,2))
+            }
+            show_status_1(accs, ndx+1)
+        })
+    }
+
+    /*      outcome/
+     * Create a duplicate object that contains only the public values of the
+     * given object (ignore functions and `_private` values)
+     */
+    function public_vals_1(o) {
+        let pv = {}
+        for(let k in o) {
+            if(!o.hasOwnProperty(k)) continue
+            if(k.startsWith('_')) continue
+            if(typeof o[k] === 'function') continue
+            pv[k] = o[k]
+        }
+        return pv
+    }
+}
+
+
+function pay(cfg, args, op) {
+    const errmsg = {
+        NODEST: op.chalk`{red.bold Error:} Specify destination for payment`,
+        NOFROM: op.chalk`{red.bold Error:} Specify wallet account name to pay '{green --from}'`,
+        NOAMT: op.chalk`{red.bold Error:} Specify '{green --amt}' to pay`,
+        BADAMTFMT: op.chalk`{red.bold Error:} Specify amount like this {bold XLM:{red 12.455}}`,
+        BADDEST: (to) => op.chalk`{red.bold Error:} "${to}" is not a valid account`,
+        BADFROM: (f) => op.chalk`{red.bold Error:} "${f}" is not a valid account`,
+    }
+
     let p = loadParams(args)
-    let name = p._rest[0]
-    if(!name) return err_no_name_1()
+    let to = p._rest[0]
+    if(!to) return op.err(errmsg.NODEST)
 
     if(p._rest.length > 1) return err_too_many_1()
 
-    op.out(op.chalk`Creating account "{green.bold ${name}}"`)
+    if(!p.from) return op.err(errmsg.NOFROM)
+    if(!p.amt) return op.err(errmsg.NOAMT)
 
-    withPassword(cfg, (pw) => {
-        luminate.create(
-            pw,
-            cfg.wallet_dir,
-            p.from,
-            p.amt,
-            name,
-            (err, acc) => {
-                if(err) op.err(err)
-                else op.out(op.chalk`{grey ${acc}}`)
+    let a = p.amt.split(':')
+    if(a.length != 2) return op.err(errmsg.BADAMTFMT)
+    let asset = a[0]
+    let amt = a[1]
+
+    op.out(op.chalk`Paying {bold.blue ${amt} ${asset}} from {red ${p.from}} to {green ${to}}`)
+
+    withAccount(cfg, to, (err, to_) => {
+        if(err) return op.err(errmsg.BADDEST(to))
+        else {
+            luminate.wallet.find(cfg.wallet_dir, p.from, (err, from) => {
+                if(err) return op.err(err)
+                else if(!from) return op.err(errmsg.BADFROM(p.from))
+                else {
+                    withPassword(cfg, (pw) => {
+                        luminate.wallet.load(cfg.wallet_dir, pw, p.from, (err, from_) => {
+                            if(err) return op.err(err)
+                            else {
+                                luminate.stellar.pay(
+                                    cfg.horizon,
+                                    from_, amt, to_,
+                                    (err) => {
+                                        if(err) return op.err(err)
+                                        else op.out(op.chalk`{bold Paid}`)
+                                    })
+                            }
+                        })
+                    })
+                }
             })
+        }
     })
 
-    function err_no_name_1() {
-        op.err(op.chalk`{red.bold Error:} Please provide a name`)
-    }
-
     function err_too_many_1() {
-        let names = p._rest.map(n => `"${n}"`).join(", ")
-        op.err(op.chalk`{red.bold Error:} Too many names for account: {green ${names}}`)
+        let dests = p._rest.map(n => `"${n}"`).join(", ")
+        op.err(op.chalk`{red.bold Error:} Too many destinations: {green ${dests}}`)
     }
+}
+
+
+/*      situtation/
+ * The user should be able to specify an account by it's name (easier)
+ * or by it's id (more reliable, especially when scripting).
+ * Additionally there are user inputs that refer to accounts that are
+ * NOT managed by our wallet.
+ *
+ *      problem/
+ * Given a user entered string, we need to resolve it to an 'account' -
+ * wallet or otherwise.
+ *
+ *      way/
+ * Given a user entered string we look for it as a wallet account. If
+ * not found, we check if it is a valid stellar account and, if so,
+ * make an 'account' object from it containing only the given public
+ * key.
+ */
+function withAccount(cfg, name, cb) {
+    luminate.wallet.find(cfg.wallet_dir, name, (err, acc) => {
+        if(err) cb(err)
+        else if(!acc) {
+            if(!StellarSdk.StrKey.isValidEd25519PublicKey(name)) return cb(`Not a valid account: ${name}`)
+            else cb(null, { pub: name })
+        } else {
+            cb(null, acc)
+        }
+    })
 }
 
 /*      outcome/
