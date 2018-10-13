@@ -202,6 +202,7 @@ function password2key(salt, password, cb) {
  */
 function saveWalletAccount(wallet, account, cb) {
     let crc = crcPublic(account.pub)
+    if(!crc) cb(`Failed generating crc for ${account.pub}`)
     let fname = `${account.label}-${account.pub}-${crc}.stellar`
     let p = path.join(wallet, fname)
     fs.writeFile(p, JSON.stringify(account,null,2), 'utf-8', cb)

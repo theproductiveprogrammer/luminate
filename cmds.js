@@ -77,20 +77,17 @@ function create(cfg, args, op) {
 
     op.out(op.chalk`Creating account "{green.bold ${name}}"`)
 
-    withPassword(cfg, (err, pw) => {
-        if(err) op.err(err)
-        else {
-            luminate.create(
-                pw,
-                cfg.wallet_dir,
-                p.from,
-                p.amt,
-                name,
-                (err, acc) => {
-                    if(err) op.err(err)
-                    else op.out(op.chalk`{grey ${acc}}`)
-                })
-        }
+    withPassword(cfg, (pw) => {
+        luminate.create(
+            pw,
+            cfg.wallet_dir,
+            p.from,
+            p.amt,
+            name,
+            (err, acc) => {
+                if(err) op.err(err)
+                else op.out(op.chalk`{grey ${acc}}`)
+            })
     })
 
     function err_no_name_1() {
@@ -114,7 +111,10 @@ function withPassword(cfg, cb) {
         read({
             prompt: "Password:",
             silent: true,
-        }, cb)
+        }, (err,pw) => {
+            if(err) cb()
+            else cb(pw)
+        })
     }
 }
 
