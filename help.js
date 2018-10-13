@@ -57,12 +57,12 @@ You can check the status of ANY account on Stellar using:
 You can import an existing account so that it can be managed by {red Luminate} by using
 the {magenta.bold SECRET Key}:
 
-    {red ./luminate} {green import} SC5ZWTUBE277Q73NRK47ZHHWKYAOCP4RKKA5SNAOJCKBXOLXLI2DE74Q
+    {red ./luminate} {green import} SC5ZWTUBE277Q73NRK47ZHHWKYAOCP4RKKA5SNAOJCKBXOLXLI2DE74Q [TODO]
 
 
 You can export your account out of luminate by exposing the {magenta.bold SECRET Key}:
 
-    {red ./luminate} {green export} GD6E56QMLH4IYFMWDIRRGRVUEWS2ZHEKHO7Y2OTGWD6VSEQGP4BSJXPV
+    {red ./luminate} {green export} GD6E56QMLH4IYFMWDIRRGRVUEWS2ZHEKHO7Y2OTGWD6VSEQGP4BSJXPV [TODO]
 
 
 You can make payments from {red Luminate}:
@@ -75,16 +75,16 @@ You can make payments from {red Luminate}:
 
 You can list all assets on the {blue Stellar} network:
 
-    {red ./luminate} {green list-assets}
+    {red ./luminate} {green list-assets} [TODO]
 
 
 You can set up a trustline on for a particular asset:
 
-    {red ./luminate} {green set-trustline} {bold --for} myFirstAccount {bold --assetcode} EVER {bold --issuer} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+    {red ./luminate} {green set-trustline} {bold --for} myFirstAccount {bold --assetcode} EVER {bold --issuer} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE [TODO]
 
 
 You can also revoke a trustline:
-    {red ./luminate} {green revoke-trustline} {bold --for} myFirstAccount {bold --assetcode} EVER {bold --issuer} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+    {red ./luminate} {green revoke-trustline} {bold --for} myFirstAccount {bold --assetcode} EVER {bold --issuer} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE [TODO]
 
 
 {bold ENVIRONMENT VARS:}

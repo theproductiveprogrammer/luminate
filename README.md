@@ -1,5 +1,9 @@
 # Luminate
 
+## TODO: Rewrite README to match new interface and decribe how Luminate now can be embedded into your applications directly or used as a batch script.
+(for now, please running `./luminate` will display a comprehensive help.
+Use the "Quickstart" section below to get started)
+
 Luminate is a free, open-source, command-line wallet for people who want
 to manage crypto on the [Stellar](https://www.stellar.org/) network.
 
