@@ -90,7 +90,9 @@ function setupOutput(cfg) {
 
             function wait_for_keypress_1(cb) {
                 process.stdin.setRawMode(true)
-                process.stdin.once('data', () => {
+                process.stdin.once('data', (d) => {
+                    let key = d.toString()
+                    if(key == "Q" || key == "q") process.exit()
                     process.stdin.setRawMode(false)
                     cb()
                 })
