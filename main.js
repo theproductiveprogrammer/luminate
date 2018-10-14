@@ -161,6 +161,7 @@ function args2UserReq(cfg, op) {
         { rx: /^status$/, fn: cmds.status },
         { rx: /^pay$/, fn: cmds.pay },
         { rx: /^import$/, fn: cmds.importSecret },
+        { rx: /^export$/, fn: cmds.exportSecret },
         { rx: /^(version|ver|-v|-ver|--version|--ver)$/, fn: showinfo },
         { rx: /^(-h|--help|help)$/, fn: showhelp },
     ];

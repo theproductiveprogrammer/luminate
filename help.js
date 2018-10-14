@@ -62,7 +62,7 @@ the {magenta.bold SECRET Key}:
 
 You can export your account out of luminate by exposing the {magenta.bold SECRET Key}:
 
-    {red ./luminate} {green export} GD6E56QMLH4IYFMWDIRRGRVUEWS2ZHEKHO7Y2OTGWD6VSEQGP4BSJXPV [TODO]
+    {red ./luminate} {green export} GD6E56QMLH4IYFMWDIRRGRVUEWS2ZHEKHO7Y2OTGWD6VSEQGP4BSJXPV
 
 
 You can make payments from {red Luminate}:

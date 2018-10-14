@@ -23,6 +23,7 @@ module.exports = {
     status: status,
     pay: pay,
     importSecret: importSecret,
+    exportSecret: exportSecret,
 }
 
 function create(cfg, args, op) {
@@ -191,6 +192,28 @@ function importSecret(cfg, args, op) {
             if(err) op.err(err)
             else op.out(op.chalk`Added new "{bold ${name}}" to wallet`)
         })
+    })
+}
+
+function exportSecret(cfg, args, op) {
+    let name = args[0]
+    if(!name) return op.err(op.chalk`{red.bold Error:} Specify account to export`)
+
+    luminate.wallet.find(cfg.wallet_dir, name, (err, acc) => {
+        if(err) op.err(err)
+        else if(!acc) op.err(op.chalk`{red.bold Error:} "${name}" is not a valid wallet account`)
+        else {
+            op.out(op.chalk`Exporting "{bold ${acc.name}}" {gray (${acc.pub})} from wallet`)
+            withPassword(cfg, (pw) => {
+                luminate.wallet.load(cfg.wallet_dir, pw, name, (err, acc_) => {
+                    if(err) op.err(err)
+                    else {
+                        let secret = acc_._kp.secret()
+                        op.out(op.chalk`{gray ${secret}}`)
+                    }
+                })
+            })
+        }
     })
 }
 
