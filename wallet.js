@@ -4,13 +4,11 @@
  * Import all the things!
  */
 const StellarSdk = require('stellar-sdk')
-const nacl = require('tweetnacl')
-const naclUtil = require('tweetnacl-util')
-const scrypt = require('scrypt')
-const base32 = require('base32')
-
 const path = require('path')
 const fs = require('fs')
+const base32 = require('base32')
+
+const crypt = require('./crypt')
 
 /*      outcome/
  * This module provides an embedded 'wallet' functionality - the ability
@@ -78,13 +76,13 @@ function createWalletAccount(pw, wallet, name, kp, cb) {
             label: name,
             pub: kp.publicKey(),
             pkg: 'tweetnacl',
-            nonce: createNonce(),
-            salt: createSalt(),
+            nonce: crypt.createNonce(),
+            salt: crypt.createSalt(),
         }
-        password2key(account.salt, password, (err, key) => {
+        crypt.password2key(account.salt, password, (err, key) => {
             if(err) cb(err)
             else {
-                account.secret = encode(kp.secret(), account.nonce, key)
+                account.secret = crypt.encrypt(kp.secret(), account.nonce, key)
                 saveWalletAccount(wallet, account, (err) => {
                     if(err) cb(err)
                     else cb(null, account.pub)
@@ -202,10 +200,10 @@ function load(wallet, pw, acc, cb) {
     })
 
     function load_secret_1(account) {
-        password2key(account.salt, pw, (err, key) => {
+        crypt.password2key(account.salt, pw, (err, key) => {
             if(err) cb(err)
             else {
-                let secret = decode(account.secret, account.nonce, key)
+                let secret = crypt.decrypt(account.secret, account.nonce, key)
                 if(!secret) cb(`Incorrect password`)
                 else {
                     try {
@@ -245,29 +243,6 @@ function ensureExists(path_, cb) {
     }
 }
 
-/*      problem/
- * The `scrypt` package provides a `params` function that is supposed to
- * wrap the parameters we require. However, using it somehow makes the
- * parameters sometimes fail and scrypt crashes with `invalid
- * parameters`.
- *
- *      way/
- * As a work-around I have seen multiple places directly specifying
- * parameters. I copied one of their paramters and thus 'solved' the
- * problem for now
- */
-const latestScryptOptions = {
-    N: 16384,
-    r: 8,
-    p: 1,
-    dkLen: nacl.secretbox.keyLength,
-    encoding: 'binary'
-};
-function password2key(salt, password, cb) {
-    if(!password) return cb(`Password not provided`)
-    scrypt.hash(password, latestScryptOptions, nacl.secretbox.keyLength, salt, cb)
-}
-
 /*      outcome/
  * Create a CRC of the public key so it's not easy to tamper with.
  */
@@ -275,33 +250,4 @@ function crcPublic(pub) {
     try {
         return base32.encode(StellarSdk.StrKey.decodeEd25519PublicKey(pub))
     } catch(e) {}
-}
-
-function createNonce() {
-    return naclUtil.encodeBase64(nacl.randomBytes(nacl.secretbox.nonceLength))
-}
-
-function createSalt() {
-    return naclUtil.encodeBase64(nacl.randomBytes(32))
-}
-
-/*      outcome/
- * Encode the given string using the given nonce
- */
-function encode(str, nonce, password) {
-    let v = naclUtil.decodeUTF8(str)
-    let n = naclUtil.decodeBase64(nonce)
-    return naclUtil.encodeBase64(nacl.secretbox(v, n, password))
-}
-
-/*      outcome/
- * Decode the given string using the given password and nonce (return
- * false if decoding fails).
- */
-function decode(enc, nonce, password) {
-    let v = naclUtil.decodeBase64(enc)
-    let n = naclUtil.decodeBase64(nonce)
-    let dec = nacl.secretbox.open(v, n, password)
-    if(!dec) return dec
-    else return naclUtil.encodeUTF8(dec)
 }

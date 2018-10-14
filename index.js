@@ -3,17 +3,18 @@
 /*      section/
  * Load our modules
  */
+const crypt = require('./crypt')
 const wallet = require('./wallet')
 const stellar = require('./stellar')
 
 /*      understand/
- * By default we provide all the functions that the wallet provides as
- * well as the functions we have wrapped around the 'stellar' api.
- *
- * Developers can choose to only use the 'wallet' functionality if they
- * only need that.
+ * For use by other programmers `luminate` provides:
+ *      - `crypt`-ography functions
+ *      - `wallet` management functions
+ *      - `stellar` helper functions
  */
 module.exports = {
+    crypt: crypt,
     wallet: wallet,
     stellar: stellar,
 }
