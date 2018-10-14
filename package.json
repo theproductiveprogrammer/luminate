@@ -2,7 +2,7 @@
   "name": "luminate",
   "version": "1.0.0",
   "description": "A Scriptable wallet for Stellar Cryptocurrency",
-  "main": "luminate",
+  "main": "index.js",
   "author": "charles.lobo@gmail.com",
   "license": "MIT",
   "dependencies": {
