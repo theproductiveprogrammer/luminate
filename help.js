@@ -57,7 +57,7 @@ You can check the status of ANY account on Stellar using:
 You can import an existing account so that it can be managed by {red Luminate} by using
 the {magenta.bold SECRET Key}:
 
-    {red ./luminate} {green import} SC5ZWTUBE277Q73NRK47ZHHWKYAOCP4RKKA5SNAOJCKBXOLXLI2DE74Q [TODO]
+    {red ./luminate} {green import} {blue myNewAccount} SC5ZWTUBE277Q73NRK47ZHHWKYAOCP4RKKA5SNAOJCKBXOLXLI2DE74Q
 
 
 You can export your account out of luminate by exposing the {magenta.bold SECRET Key}:

@@ -22,6 +22,7 @@ module.exports = {
     list: list,
     status: status,
     pay: pay,
+    importSecret: importSecret,
 }
 
 function create(cfg, args, op) {
@@ -170,6 +171,27 @@ function pay(cfg, args, op) {
         let dests = p._rest.map(n => `"${n}"`).join(", ")
         op.err(op.chalk`{red.bold Error:} Too many destinations: {green ${dests}}`)
     }
+}
+
+function importSecret(cfg, args, op) {
+    const errmsg = {
+        NONAME: op.chalk`{red.bold Error:} Specify name`,
+        NOSECRET: op.chalk`{red.bold Error:} Specify secret`,
+        BADSECRET: (s) => op.chalk`{red.bold Error:} "{red ${s}}" is not a valid secret`,
+    }
+
+    let name = args[0]
+    let secret = args[1]
+    if(!name) return op.err(errmsg.NONAME)
+    if(!secret) return op.err(errmsg.NOSECRET)
+    if(!StellarSdk.StrKey.isValidEd25519SecretSeed(secret)) return op.err(errmsg.BADSECRET(secret))
+
+    withPassword(cfg, (pw) => {
+        luminate.wallet.importSecret(pw, cfg.wallet_dir, name, secret, (err) => {
+            if(err) op.err(err)
+            else op.out(op.chalk`Added new "{bold ${name}}" to wallet`)
+        })
+    })
 }
 
 

@@ -22,19 +22,50 @@ module.exports = {
     list: list,
     find: find,
     load: load,
+    importSecret: importSecret,
 }
 
+/*      outcome/
+ * Creates a new account in the wallet with the given name.
+ */
 function create(pw, wallet, name, cb) {
     if(!pw) return cb("Need Password")
     if(!wallet) return cb("Need wallet folder")
     if(!name) return cb("Need name of account")
 
+    try {
+        let kp = StellarSdk.Keypair.random()
+        createWalletAccount(pw, wallet, name, kp, cb)
+    } catch(e) {
+        cb(e)
+    }
+}
+
+/*      outcome/
+ * Imports an existing secret into the wallet.
+ */
+function importSecret(pw, wallet, name, secret, cb) {
+    if(!pw) return cb("Need Password")
+    if(!wallet) return cb("Need wallet folder")
+    if(!name) return cb("Need name of account")
+    if(!StellarSdk.StrKey.isValidEd25519SecretSeed(secret)) return cb("Invalid secret")
+
+    try {
+        let kp = StellarSdk.Keypair.fromSecret(secret)
+        createWalletAccount(pw, wallet, name, kp, cb)
+    } catch(e) {
+        cb(e)
+    }
+}
+
+
+/*      outcome/
+ * Create a wallet and save the given keypair as the named account.
+ */
+function createWalletAccount(pw, wallet, name, kp, cb) {
     ensureExists(wallet, (err) => {
         if(err) cb(err)
-        else {
-            let kp = StellarSdk.Keypair.random()
-            create_account_1(kp, name, pw, wallet, cb)
-        }
+        else create_account_1(kp, name, pw, wallet, cb)
     })
 
     /*      outcome/
@@ -74,7 +105,10 @@ function saveWalletAccount(wallet, account, cb) {
     if(!crc) cb(`Failed generating crc for ${account.pub}`)
     let fname = `${account.label}-${account.pub}-${crc}.stellar`
     let p = path.join(wallet, fname)
-    fs.writeFile(p, JSON.stringify(account,null,2), 'utf-8', cb)
+    fs.access(p, fs.constants.F_OK, (err) => {
+        if(!err) cb(`Wallet account ${fname} already exists`)
+        else fs.writeFile(p, JSON.stringify(account,null,2), 'utf-8', cb)
+    });
 }
 
 function list(wallet, cb) {
