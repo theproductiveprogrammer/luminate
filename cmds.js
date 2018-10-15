@@ -126,7 +126,7 @@ function list(cfg, args, op) {
 
 function status(cfg, args, op) {
     if(args.length == 1) {
-        luminate.wallet.find(cfg.wallet_dir, args[0], (err, acc) => {
+        withAccount(cfg, args[0], (err, acc) => {
             if(err) op.err(err)
             else if(!acc) op.err(op.chalk`{bold.red Error:} "${args[0]}" is not a valid account`)
             else show_status_1([acc], 0)
@@ -146,7 +146,7 @@ function status(cfg, args, op) {
             if(err) op.err(err)
             else {
                 if(acc.name) op.out(op.chalk`{bold Account:} {green ${acc.name}}`)
-                else op.out(op.chalk`{bold Account:} {green ${acc.id}}`)
+                else op.out(op.chalk`{bold Account:} {green ${ai.id}}`)
                 op.out(JSON.stringify(public_vals_1(ai),null,2))
             }
             show_status_1(accs, ndx+1)
