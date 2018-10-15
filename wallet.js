@@ -234,6 +234,10 @@ function ensureExists(path_, cb) {
     }
     let p = path_.split(path.sep)
     if(p[0] == '.') p.shift() // Don't create current directory
+    else if(p[0] == '') { // Absolute path
+        p.shift()
+        p[0] = path.sep + p[0]
+    }
     ensure_exists_1(p, 1)
 
     function ensure_exists_1(p, upto) {
