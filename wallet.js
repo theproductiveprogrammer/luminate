@@ -192,7 +192,7 @@ function find(wallet, name, cb) {
  * Finds and loads the first matching account in the wallet (including
  * the full keypair - public and secret keys).
  */
-function load(wallet, pw, acc, cb) {
+function load(pw, wallet, acc, cb) {
     list(wallet, (err, accs) => {
         if(err) cb(err)
         else {

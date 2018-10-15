@@ -81,7 +81,7 @@ function activate(cfg, args, op) {
                 else if(!from) return op.err(errmsg.BADFROM(p.from))
                 else {
                     withPassword(cfg, (pw) => {
-                        luminate.wallet.load(cfg.wallet_dir, pw, p.from, (err, from_) => {
+                        luminate.wallet.load(pw, cfg.wallet_dir, p.from, (err, from_) => {
                             if(err) return op.err(err)
                             else {
                                 luminate.stellar.activate(
@@ -203,7 +203,7 @@ function pay(cfg, args, op) {
                 else if(!from) return op.err(errmsg.BADFROM(p.from))
                 else {
                     withPassword(cfg, (pw) => {
-                        luminate.wallet.load(cfg.wallet_dir, pw, p.from, (err, from_) => {
+                        luminate.wallet.load(pw, cfg.wallet_dir, p.from, (err, from_) => {
                             if(err) return op.err(err)
                             else {
                                 luminate.stellar.pay(
@@ -258,7 +258,7 @@ function exportSecret(cfg, args, op) {
         else {
             op.out(op.chalk`Exporting "{bold ${acc.name}}" {gray (${acc.pub})} from wallet`)
             withPassword(cfg, (pw) => {
-                luminate.wallet.load(cfg.wallet_dir, pw, name, (err, acc_) => {
+                luminate.wallet.load(pw, cfg.wallet_dir, name, (err, acc_) => {
                     if(err) op.err(err)
                     else {
                         let secret = acc_._kp.secret()
