@@ -110,14 +110,19 @@ function saveWalletAccount(wallet, account, cb) {
 }
 
 function list(wallet, cb) {
-    fs.readdir(wallet, 'utf8', (err, files) => {
+    ensureExists(wallet, (err) => {
         if(err) cb(err)
         else {
-            let accum = {
-                accs: [],
-                errs: [],
-            }
-            load_accs_1(files, 0, accum)
+            fs.readdir(wallet, 'utf8', (err, files) => {
+                if(err) cb(err)
+                else {
+                    let accum = {
+                        accs: [],
+                        errs: [],
+                    }
+                    load_accs_1(files, 0, accum)
+                }
+            })
         }
     })
 
