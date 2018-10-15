@@ -30,15 +30,15 @@ you for a password to encrypt this account. You can use different
 passwords for each account but it is generally more convienient to use
 the same password for all accounts (just because it's easier to remember).
 
-Now, the way {blue Stellar} works, this account is not yet active (or even available)
+Now, the way {blue Stellar} works, this account is not yet active (or available)
 on the network. In order to activate this account you will need to transfer some
 funds into it using an already active account and you're ready to go.
 
 
-If you have an active account, you can now do this all in one step in {red Luminate}
-using:
+Once you have an active account, you can activate another accounts using:
 
-    {red ./luminate} {green.bold create} {bold --from} myFirstAccount {bold --amt} 2 secondAccount [TODO]
+    {red ./luminate} {green.bold activate} {bold --from} activeAccount {bold --amt} 2 inactiveAccount
+
 
 After adding a few accounts to your wallet, you can list all of them:
 

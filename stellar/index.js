@@ -10,6 +10,7 @@ const StellarSdk = require('stellar-sdk')
  */
 module.exports = {
     status: status,
+    activate: activate,
     pay: pay,
 }
 
@@ -48,6 +49,27 @@ function status(hz, acc, cb) {
             }
         })
 }
+
+function activate(hz, from, amt, acc, cb) {
+    let svr = getSvr(hz)
+    if(!from._kp) return cb(`Account missing keypair - did you forget to load it?`)
+    if(!StellarSdk.StrKey.isValidEd25519PublicKey(acc.pub)) return cb(`Not a valid account: ${acc.pub}`)
+
+    svr.loadAccount(from.pub)
+        .then(ai => {
+            let txn = new StellarSdk.TransactionBuilder(ai)
+                .addOperation(StellarSdk.Operation.createAccount({
+                    destination: acc.pub,
+                    startingBalance: amt,
+                }))
+                .build()
+            txn.sign(from._kp)
+            return svr.submitTransaction(txn)
+        })
+        .then(txnres => cb(null, txnres))
+        .catch(cb)
+}
+
 
 function pay(hz, from, asset, amt, to, cb) {
     let svr = getSvr(hz)
@@ -129,7 +151,5 @@ function pay(hz, from, asset, amt, to, cb) {
             }
         })
     }
-
-
 }
 

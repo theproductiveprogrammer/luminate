@@ -19,6 +19,7 @@ const luminate = require('./index')
  */
 module.exports = {
     create: create,
+    activate: activate,
     list: list,
     status: status,
     pay: pay,
@@ -45,6 +46,58 @@ function create(cfg, args, op) {
     function err_no_name_1() {
         op.err(op.chalk`{red.bold Error:} Please provide a name`)
     }
+
+    function err_too_many_1() {
+        let names = p._rest.map(n => `"${n}"`).join(", ")
+        op.err(op.chalk`{red.bold Error:} Too many names for account: {green ${names}}`)
+    }
+}
+
+function activate(cfg, args, op) {
+    const errmsg = {
+        NODEST: op.chalk`{red.bold Error:} Specify account to activate`,
+        NOFROM: op.chalk`{red.bold Error:} Specify wallet account '{green --from}'`,
+        NOAMT: op.chalk`{red.bold Error:} Specify '{green --amt}' to fund`,
+        BADDEST: (acc) => op.chalk`{red.bold Error:} "${acc}" is not a valid account`,
+        BADFROM: (f) => op.chalk`{red.bold Error:} "${f}" is not a valid account`,
+    }
+
+    let p = loadParams(args)
+    let acc = p._rest[0]
+    if(!acc) return op.err(errmsg.NODEST)
+
+    if(p._rest.length > 1) return err_too_many_1()
+
+    if(!p.from) return op.err(errmsg.NOFROM)
+    if(!p.amt) return op.err(errmsg.NOAMT)
+
+    op.out(op.chalk`Activating account "{green ${acc}}" from "{red ${p.from}}" with funds "{bold.blue XLM:${p.amt}}"`)
+
+    withAccount(cfg, acc, (err, acc_) => {
+        if(err) return op.err(errmsg.BADDEST(acc))
+        else {
+            luminate.wallet.find(cfg.wallet_dir, p.from, (err, from) => {
+                if(err) return op.err(err)
+                else if(!from) return op.err(errmsg.BADFROM(p.from))
+                else {
+                    withPassword(cfg, (pw) => {
+                        luminate.wallet.load(cfg.wallet_dir, pw, p.from, (err, from_) => {
+                            if(err) return op.err(err)
+                            else {
+                                luminate.stellar.activate(
+                                    cfg.horizon,
+                                    from_, p.amt, acc_,
+                                    (err) => {
+                                        if(err) return op.err(err)
+                                        else op.out(op.chalk`{bold Activated}`)
+                                    })
+                            }
+                        })
+                    })
+                }
+            })
+        }
+    })
 
     function err_too_many_1() {
         let names = p._rest.map(n => `"${n}"`).join(", ")

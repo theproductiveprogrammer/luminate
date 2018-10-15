@@ -157,6 +157,7 @@ function setupOutput(cfg) {
 function args2UserReq(cfg, op) {
     const argmap = [
         { rx: /^create$/, fn: cmds.create },
+        { rx: /^activate$/, fn: cmds.activate },
         { rx: /^list$/, fn: cmds.list },
         { rx: /^status$/, fn: cmds.status },
         { rx: /^pay$/, fn: cmds.pay },
