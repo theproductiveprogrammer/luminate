@@ -25,6 +25,7 @@ module.exports = {
     pay: pay,
     importSecret: importSecret,
     exportSecret: exportSecret,
+    listAssets: listAssets,
 }
 
 function create(cfg, args, op) {
@@ -268,6 +269,15 @@ function exportSecret(cfg, args, op) {
             })
         }
     })
+}
+
+/*      outcome/
+ * Show the assets along with their issuers
+ */
+function listAssets(cfg, args, op) {
+    luminate.stellar.listAssets(cfg.horizon, (rec) => {
+        op.out(op.chalk`{gray ${rec.asset_issuer}} {bold.blue ${rec.asset_code}}`)
+    }, op.err)
 }
 
 

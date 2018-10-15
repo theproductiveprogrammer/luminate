@@ -75,7 +75,7 @@ You can make payments from {red Luminate}:
 
 You can list all assets on the {blue Stellar} network:
 
-    {red ./luminate} {green list-assets} [TODO]
+    {red ./luminate} {green list-assets}
 
 
 You can set up a trustline on for a particular asset:

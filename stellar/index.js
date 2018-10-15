@@ -12,6 +12,7 @@ module.exports = {
     status: status,
     activate: activate,
     pay: pay,
+    listAssets: listAssets,
 }
 
 /*      understand/
@@ -150,6 +151,32 @@ function pay(hz, from, asset, amt, to, cb) {
                 cb(`No matching asset found for: "${asset}"`)
             }
         })
+    }
+}
+
+
+/*      outcome/
+ * Load assets along with their issuers from the Stellar network and
+ * provide them to the callback.
+ */
+function listAssets(hz, out, err) {
+    let svr = getSvr(hz)
+    svr.assets()
+        .call()
+        .then(show_asset_1)
+        .catch(err)
+
+    function show_asset_1(a) {
+        if(a.records) {
+            for(let i = 0;i < a.records.length;i++) {
+                out(a.records[i])
+            }
+        }
+        if(a.next) {
+            a.next()
+            .then(show_asset_1)
+            .catch(err)
+        }
     }
 }
 
