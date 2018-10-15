@@ -80,11 +80,11 @@ You can list all assets on the {blue Stellar} network:
 
 You can set up a trustline on for a particular asset:
 
-    {red ./luminate} {green set-trustline} {bold --for} myFirstAccount {bold --assetcode} EVER {bold --issuer} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE [TODO]
+    {red ./luminate} {green set-trustline} {bold --for} myFirstAccount {bold --assetcode} EVER {bold --issuer} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
 
 
 You can also revoke a trustline:
-    {red ./luminate} {green revoke-trustline} {bold --for} myFirstAccount {bold --assetcode} EVER {bold --issuer} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE [TODO]
+    {red ./luminate} {green revoke-trustline} {bold --for} myFirstAccount {bold --assetcode} EVER {bold --issuer} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
 
 
 {bold ENVIRONMENT VARS:}

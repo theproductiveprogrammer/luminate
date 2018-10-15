@@ -164,6 +164,8 @@ function args2UserReq(cfg, op) {
         { rx: /^import$/, fn: cmds.importSecret },
         { rx: /^export$/, fn: cmds.exportSecret },
         { rx: /^list-assets$/, fn: cmds.listAssets },
+        { rx: /^set-trustline$/, fn: cmds.setTrustline },
+        { rx: /^revoke-trustline$/, fn: cmds.revokeTrustline },
         { rx: /^(version|ver|-v|-ver|--version|--ver)$/, fn: showinfo },
         { rx: /^(-h|--help|help)$/, fn: showhelp },
     ];

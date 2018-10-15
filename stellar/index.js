@@ -13,6 +13,8 @@ module.exports = {
     activate: activate,
     pay: pay,
     listAssets: listAssets,
+    setTrustline: setTrustline,
+    revokeTrustline: revokeTrustline,
 }
 
 /*      understand/
@@ -177,6 +179,46 @@ function listAssets(hz, out, err) {
             .then(show_asset_1)
             .catch(err)
         }
+    }
+}
+
+function setTrustline(hz, for_, assetcode, issuer, cb) {
+    try {
+        let svr = getSvr(hz)
+        let asset = new StellarSdk.Asset(assetcode, issuer)
+        let op = { asset : asset }
+        svr.loadAccount(for_.pub)
+            .then(ai => {
+                let txn = new StellarSdk.TransactionBuilder(ai)
+                    .addOperation(StellarSdk.Operation.changeTrust(op))
+                    .build()
+                txn.sign(for_._kp)
+                return svr.submitTransaction(txn)
+            })
+            .then(txnres => cb(null, txnres))
+            .catch(cb)
+    } catch(e) {
+        cb(e)
+    }
+}
+
+function revokeTrustline(hz, for_, assetcode, issuer, cb) {
+    try {
+        let svr = getSvr(hz)
+        let asset = new StellarSdk.Asset(assetcode, issuer)
+        let op = { asset : asset, limit: "0" }
+        svr.loadAccount(for_.pub)
+            .then(ai => {
+                let txn = new StellarSdk.TransactionBuilder(ai)
+                    .addOperation(StellarSdk.Operation.changeTrust(op))
+                    .build()
+                txn.sign(for_._kp)
+                return svr.submitTransaction(txn)
+            })
+            .then(txnres => cb(null, txnres))
+            .catch(cb)
+    } catch(e) {
+        cb(e)
     }
 }
 

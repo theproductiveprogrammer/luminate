@@ -26,6 +26,8 @@ module.exports = {
     importSecret: importSecret,
     exportSecret: exportSecret,
     listAssets: listAssets,
+    setTrustline: setTrustline,
+    revokeTrustline: revokeTrustline,
 }
 
 function create(cfg, args, op) {
@@ -280,6 +282,82 @@ function listAssets(cfg, args, op) {
     }, op.err)
 }
 
+
+/*      outcome/
+ * Set up a trustline for an asset in the wallet account
+ */
+function setTrustline(cfg, args, op) {
+    const errmsg = {
+        NOFOR: op.chalk`{red.bold Error:} Specify {green --for}`,
+        NOASSETCODE: op.chalk`{red.bold Error:} Specify {green --assetcode}`,
+        NOISSUER: op.chalk`{red.bold Error:} Specify {green --issuer}`,
+    }
+
+    let p = loadParams(args)
+    if(!p.for) return op.err(errmsg.NOFOR)
+    if(!p.assetcode) return op.err(errmsg.NOASSETCODE)
+    if(!p.issuer) return op.err(errmsg.NOISSUER)
+
+    withAccount(cfg, p.issuer, (err, for_) => {
+        if(err) return op.err(err)
+        else {
+            withPassword(cfg, (pw) => {
+                luminate.wallet.load(pw, cfg.wallet_dir, p.for, (err, for_) => {
+                    if(err) return op.err(err)
+                    else {
+                        luminate.stellar.setTrustline(
+                            cfg.horizon,
+                            for_,
+                            p.assetcode,
+                            p.issuer,
+                            (err) => {
+                                if(err) return op.err(err)
+                                else op.out(op.chalk`{bold Trustline Set}`)
+                            })
+                    }
+                })
+            })
+        }
+    })
+}
+
+/*      outcome/
+ * Revoke a trustline for an asset in the wallet account
+ */
+function revokeTrustline(cfg, args, op) {
+    const errmsg = {
+        NOFOR: op.chalk`{red.bold Error:} Specify {green --for}`,
+        NOASSETCODE: op.chalk`{red.bold Error:} Specify {green --assetcode}`,
+        NOISSUER: op.chalk`{red.bold Error:} Specify {green --issuer}`,
+    }
+
+    let p = loadParams(args)
+    if(!p.for) return op.err(errmsg.NOFOR)
+    if(!p.assetcode) return op.err(errmsg.NOASSETCODE)
+    if(!p.issuer) return op.err(errmsg.NOISSUER)
+
+    withAccount(cfg, p.issuer, (err, for_) => {
+        if(err) return op.err(err)
+        else {
+            withPassword(cfg, (pw) => {
+                luminate.wallet.load(pw, cfg.wallet_dir, p.for, (err, for_) => {
+                    if(err) return op.err(err)
+                    else {
+                        luminate.stellar.revokeTrustline(
+                            cfg.horizon,
+                            for_,
+                            p.assetcode,
+                            p.issuer,
+                            (err) => {
+                                if(err) return op.err(err)
+                                else op.out(op.chalk`{bold Trustline Revoked}`)
+                            })
+                    }
+                })
+            })
+        }
+    })
+}
 
 /*      situtation/
  * The user should be able to specify an account by it's name (easier)
