@@ -85,7 +85,7 @@ function createWalletAccount(pw, wallet, name, kp, cb) {
                 account.secret = crypt.encrypt(kp.secret(), account.nonce, key)
                 saveWalletAccount(wallet, account, (err) => {
                     if(err) cb(err)
-                    else cb(null, account.pub)
+                    else cb(null, account)
                 })
             }
 

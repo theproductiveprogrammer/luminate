@@ -42,7 +42,7 @@ function create(cfg, args, op) {
     withPassword(cfg, (pw) => {
         luminate.wallet.create(pw, cfg.wallet_dir, name, (err, acc) => {
                 if(err) op.err(err)
-                else op.out(op.chalk`{grey ${acc}}`)
+                else op.out(op.chalk`{grey ${acc.pub}}`)
         })
     })
 
