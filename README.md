@@ -165,6 +165,14 @@ You can find the current Luminate version using:
     ./luminate version
 
 
+## How to Contribute to Luminate
+Luminate is open to everyone and any help is greatly appreciated.  Feel
+free to [raise issues](https://github.com/theproductiveprogrammer/luminate/issues),
+[contribute features](https://github.com/theproductiveprogrammer/luminate/pulls),
+[improve the documentation](https://github.com/theproductiveprogrammer/luminate/pulls),
+or simply [add your suggestions](https://github.com/theproductiveprogrammer/luminate/issues).
+
+
 ### Pending Features
 
 * Multi-Signature Support
