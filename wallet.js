@@ -153,12 +153,16 @@ function list(wallet, cb) {
                     } else {
                         try {
                             data = JSON.parse(data)
-                            accum.accs.push({
-                                name: name,
-                                pub: pub,
-                                data: data,
-                                file: file,
-                            })
+                            if(data.version != 'v2') {
+                                accum.errs.push(file)
+                            } else {
+                                accum.accs.push({
+                                    name: name,
+                                    pub: pub,
+                                    data: data,
+                                    file: file,
+                                })
+                            }
                             load_accs_1(files, ndx+1, accum)
                         } catch(e) {
                             accum.errs.push(file)
