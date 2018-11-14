@@ -134,7 +134,7 @@ function list(wallet, cb) {
     function load_accs_1(files, ndx, accum) {
         if(ndx >= files.length) return cb(null, accum.accs, accum.errs)
         let file = files[ndx]
-        let m = file.match(/(.*)-(.*)-(.*)\.stellar/)
+        let m = file.match(/^(.*)-(.*)-(.*)\.stellar$/)
         if(!m) {
             accum.errs.push(file)
             load_accs_1(files, ndx+1, accum)
