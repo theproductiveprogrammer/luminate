@@ -1,7 +1,7 @@
 'use strict'
+const crypto = require('crypto')
 const nacl = require('tweetnacl')
 const naclUtil = require('tweetnacl-util')
-const scrypt = require('scrypt')
 
 /*      understand/
  * This module contains crytography functions wrappers to make it easier
@@ -15,27 +15,12 @@ module.exports = {
     decrypt: decrypt,
 }
 
-/*      problem/
- * The `scrypt` package provides a `params` function that is supposed to
- * wrap the parameters we require. However, using it somehow makes the
- * parameters sometimes fail and scrypt crashes with `invalid
- * parameters`.
- *
- *      way/
- * As a work-around I have seen multiple places directly specifying
- * parameters. I copied one of their paramters and thus 'solved' the
- * problem for now
+/*      outcome/
+ * We use the standard `pbkdf2()` function with the given salt to
+ * generate a password key.
  */
-const latestScryptOptions = {
-    N: 16384,
-    r: 8,
-    p: 1,
-    dkLen: nacl.secretbox.keyLength,
-    encoding: 'binary'
-};
 function password2key(salt, password, cb) {
-    if(!password) return cb(`Password not provided`)
-    scrypt.hash(password, latestScryptOptions, nacl.secretbox.keyLength, salt, cb)
+    crypto.pbkdf2(password, salt, 100000, nacl.secretbox.keyLength, 'sha512', cb)
 }
 
 function createNonce() {

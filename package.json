@@ -10,7 +10,6 @@
     "chalk": "^2.4.1",
     "dotenv": "^6.1.0",
     "read": "^1.0.7",
-    "scrypt": "^6.0.3",
     "stellar-sdk": "^0.10.3",
     "tweetnacl": "^1.0.0",
     "tweetnacl-util": "^0.15.0"
