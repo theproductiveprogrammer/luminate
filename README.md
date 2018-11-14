@@ -1,250 +1,173 @@
 # Luminate
 
-## TODO: Rewrite README to match new interface and decribe how Luminate now can be embedded into your applications directly or used as a batch script.
-(for now, please running `./luminate` will display a comprehensive help.
-Use the "Quickstart" section below to get started)
-
-Luminate is a free, open-source, command-line wallet for people who want
-to manage crypto on the [Stellar](https://www.stellar.org/) network.
+Luminate is a free, open-source, embeddable, command-line wallet for
+people who want to manage crypto on the [Stellar](https://www.stellar.org/) network.
 
 ![luminate](icon_400x400.png)
 
 Stellar has [an excellent API](https://www.stellar.org/developers/reference/)
 and [several excellent wallets](https://www.stellar.org/lumens/wallets/).
-The goal of Luminate is to add to this ecosystem by providing a command line
-wallet for users who do not want to install a full desktop application or trust a web service.
+The goal of Luminate is to add to this ecosystem by providing an
+embeddable wallet that any developer can use to manage Stellar wallets
+in his own application and to provide a lightweight, powerful,
+scriptable command-line wallet for users who who do not want to install
+a full desktop application or trust a web service.
 
-Because it is a command-line application, Luminate is simple, flexible, yet very
-powerful. The code is a thin wrapper around [the Stellar
-API](https://www.stellar.org/developers/reference/), which makes Luminate simple
-and clean with a small code footprint. Luminate is easy to understand
-at a glance and transparent enough to be easily customized and fully
-trusted.
+## QuickStart (Command-line Wallet)
 
-## QuickStart
 Luminate is a [node](https://nodejs.org/) application. Make sure you
 have node (and the [yarn](https://yarnpkg.com/) package manager)
 installed then do the following:
 
 1. Download [Luminate](https://github.com/theproductiveprogrammer/luminate) from Github
 2. Run `yarn install`
-3. Run `./luminate <command>`
+3. Run `./luminate`
 
-## Available Commands
-`Luminate` allows you to perform any stellar action from the command
-line. For each action you provide a command with arguments similar to
-other command-line programs you have used.
+## QuickStart (Embedded Version)
 
-The available commands are:
+Add [Luminate](https://github.com/theproductiveprogrammer/luminate) as a [Nodejs](https://nodejs.org)
+dependency. For example, if you are using [yarn](https://yarnpkg.com/)
 
-```
-    status  :   Show status of wallet accounts
-    new     :   Create a new wallet account (Use the 'create' command to reflect this account on stellar)
-    create  :   Create (and fund) an account on stellar
-    add     :   Import an existing account to the wallet
-    trust   :   Add/Revoke Trustline
-    pay     :   Send payments
+1. `yarn add theproductiveprogrammer/luminate`
+2. Require `luminate` in your program:
 
-    list-assets:   List available assets on the Stellar Network
-```
+        const luminate = require('luminate')
 
-*TODO*: Advanced commands (multi-signature, offer management, set options)
+3. Use the wallet functionality:
 
-### Command Details
-1. The `status` Command
+        luminate.wallet.create(password, walletpath, accountname, cb)
+        luminate.wallet.list(walletpath, cb)
+        luminate.wallet.find(walletpath, accountnameOrpublickey, cb)
+        luminate.wallet.load(password, walletpath, accountname, cb)
+        luminate.wallet.importSecret(password, walletpath, accountname, secret, cb)
 
-This command show the status of all the accounts in the wallet.
+You can `create` a new account in the wallet, `list` all the accounts,
+`find` an account (by name or public key), `load` an account (which
+gives you access to the secret key), and `import` existing accounts if
+you have access to their secret keys.
 
-        status [-v] [#acc]
+### Other Embedded functionality
 
-The status includes the current balances of the account on the stellar
-network. Using the `-v` flag will show a verbose output with many
-details including the secret key of the account (useful if you want to
-migrate out of `luminate`).
+`Luminate` also provides access to all it's other functionality so that
+you can use it if you feel it is convenient. Specifically you can use
+the `stellar` functionality and the `crypto` primitives used if you need
+them.
 
-If you specify the account (`#acc`) in the wallet, only the status of
-that account will be fetched. (Refer the section **Specifying Accounts**
-below for details on how to specify accounts).
+        luminate.stellar. ...
+        luminate.crypt. ...
 
-2. The `new` Command
 
-This command creates a new account in our wallet.
+## Detailed Command-line Usage
 
-        new [-q]
+Luminate can manage all your Stellar accounts for you. It
+stores all your accounts in a local folder called the "wallet".
+These accounts are strongly encrypted so they can be safely stored and
+backed up.
 
-The `-q` (quiet) flag suppresses most output. This newly created account
-will be encrypted and safety stored in the wallet. Because Stellar
-requires newly created accounts to be funded this account is not created
-on the Stellar network by default. To reflect this into the Stellar
-network use the `create` command (which follows).
+> If you forget your password your accounts CANNOT be used anymore!
+> Ensure you choose a good password and make sure you remember it.
 
-3. The `create` Command
 
-This command creates and funds an account on Stellar
+Create your first wallet account:
 
-        create [-q] <account|#> <funds> <#acc>
+    ./luminate create myFirstAccount
 
-Here we use an existing account that has funds to create and fund our
-new account on the stellar network. The 'creating' account as well as the
-'created' account can be specified as detailed in the **Specifying
-Accounts** section below.
+Luminate create a new account, name it "myFirstAccount" and ask
+you for a password to encrypt this account. You can use different
+passwords for each account but it is generally more convienient to use
+the same password for all accounts (just because it's easier to remember).
 
-This command can also be used to create and fund (in `XLM`) a
-third-party's account (one which we do not manage in our wallet). In
-such a case, simply specify the third party's account key (public) as
-the first parameter.
+Now, the way Stellar works, this account is not yet active (or available)
+on the network. In order to activate this account you will need to transfer some
+funds into it using an already active account and you're ready to go.
 
-Use the `-q` (quiet) flag to suppress most outputs and warnings.
 
-*Example*
+Once you have an active account, you can activate another accounts using:
 
-        ./luminate create latestAccount 25 existingAccount
+    ./luminate activate --from activeAccount --amt 2 inactiveAccount
 
-4. The `add` Command
 
-This command allows you to import an existing account into `luminate`.
+After adding a few accounts to your wallet, you can list all of them:
 
-        add [-v] <secret>
+    ./luminate list
 
-The `secret` is the 32-byte ed25519 seed. Use `-v` to get a more verbose
-output.
 
-*Example*
+You can check the status of your account on Stellar using:
 
-        ./luminate add -v SCNXL3IWO2R6NJ7CKVEYZG5XCNZYTPIQ3ZCRCG22WPKGYRCM6RETS3JY
+    ./luminate status myFirstAccount
 
-5. The `trust` Command
+You can check the status of ANY account on Stellar using:
 
-Add or Revoke a
-[Trustline](https://www.stellar.org/developers/guides/concepts/assets.html#trustlines)
+    ./luminate status GD6E56QMLH4IYFMWDIRRGRVUEWS2ZHEKHO7Y2OTGWD6VSEQGP4BSJXPV
 
-        trust [-revoke] <#acc> <assetCode> <issuer>
 
-The `list-assets` command can be used to find the correct asset and
-issuer.
+You can import an existing account so that it can be managed by Luminate by using
+the SECRET Key:
 
-*Example*
+    ./luminate import myNewAccount SC5ZWTUBE277Q73NRK47ZHHWKYAOCP4RKKA5SNAOJCKBXOLXLI2DE74Q
 
-        ./luminate trust myacc1 CARS GASRAW5RT6GIC47O4XLMGDNEDTG6Y6DJ7QEHACOTZAWISQN6J5BRN5YX
 
+You can export your account out of luminate by exposing the SECRET Key:
 
-6. The `pay` Command
+    ./luminate export GD6E56QMLH4IYFMWDIRRGRVUEWS2ZHEKHO7Y2OTGWD6VSEQGP4BSJXPV
 
-Send payment to another account
 
-        pay [-v] <dest> <#acc> <amount> <assetCode> [issuer]
+You can make payments from Luminate:
 
-This command sends `amount` of `assetCode` to the `dest` account. If
-`assetCode` is ambigous you can specify the `issuer` to ensure the
-correct asset is transferred (if `luminate` detects that there could be
-any potential for confusion it will not make the payment until the
-issuer is provided).
+    ./luminate pay --from myFirstAccount --amt XLM:12.345 --to GBHEJM54VIBM6GPC5FZTD7A4O5VZCZAUOYSEIQUXKWJMHL3QMUOJHKHR
 
-*Example*
 
-        ./luminate GASRAW5RT6GIC47O4XLMGDNEDTG6Y6DJ7QEHACOTZAWISQN6J5BRN5YX myacc1 3.3 CARS
 
+ADVANCED FUNCTIONS
 
-7. The `list-assets` Command
+You can list all assets on the Stellar network:
 
-List available assets on the Stellar Network
+    ./luminate list-assets
 
-        list-assets
 
-This command lists all available assets along with their issuing
-accounts. This is useful, for example, when we need to set up a
-trustline.
+You can set up a trustline on for a particular asset:
 
-*Example*
+    ./luminate set-trustline --for myFirstAccount --assetcode EVER --issuer GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
 
-        ./luminate list-assets
 
+You can also revoke a trustline:
+    ./luminate revoke-trustline --for myFirstAccount --assetcode EVER --issuer GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
 
 
-### Specifying Accounts
-As you can have multiple accounts in your wallet, `luminate` gives you
-two simple methods for selecting them:
+ENVIRONMENT VARS:
+The following environmental variables control the behaviour of Luminate.
+They can also be set in a file called ".env".
 
-1. Every account in the wallet has a name. Specifying this name will
-   select the account.
-2. Specifying the first few matching characters of the public key will
-   also select the account
+    LM__AS_SCRIPT         :   Script friendly output
+                              (easier to extract and parse)
+    LM__NO_COLOR          :   Output plain text
+                              (no color or format)
+    LM__WALLET_PASSWORD   :   Password for wallet account used
+                              (only valid in scripts: "LM__AS_SCRIPT" must be set)
+    LM__WALLET_FOLDER     :   Path to wallet folder
+                              (defaults to .wallet/)
+    LM__HORIZON           :   Horizon server to use
+                              (defaults to "LIVE". Can be set to "TEST")
 
-*Example*
 
-        ./luminate status myacc1
-        ./luminate status GASRAW5RT6GIC47O4XLMGDNEDTG6Y6DJ7QEHACOTZAWISQN6J5BRN5YX
-        ./luminate status GASR
 
-All the above select the same account in the wallet
+HELP:
+Running Luminate without any command or any of the following:
 
+    ./luminate help
+    ./luminate --help
+    ./luminate -h
 
-## Connecting to the test network
-`Luminate` now connects to the 'stellar *live* network' by default.
-Please set the `HORIZON` parameter to `TEST` in order to connect to the
-test network.
+Will bring up this help screen.
 
-```
-$ HORIZON=LIVE node . account info GD....
-```
+You can find the current Luminate version using:
 
-## Security
-`Luminate` stores and manages each of your wallet keys locally. All your
-data is stored on your machine (you can specify the location or use the
-default `stellar-keystore/`).
+    ./luminate version
 
-In order to store your keys securely `Luminate` will ask you for a
-password when creating a new keypair. _This password is important and
-should be kept safe_. If you loose the password, there is no way for you
-to retrieve your keypair.
-
-Please backup your keypairs safely. Because they are encrypted they are
-safe to back up in your normal backup locations.
-
-## Options and Customization
-`Luminate` provides the following options you can customize.
-
-- `DEBUG`
-    If we set `DEBUG`, `Luminate` will dump more detail (including stack
-    information in errors)
-
-- `KEYSTORE_FOLDER`
-    This is the location where `Luminate` stores all your wallet keys
-    Defaults to `./stellar-keystore`
-
-- `HORIZON`
-    This is the stellar network to which the wallet connects.
-    _*By default this connects to the live stellar network*_
-    However, if you would like to play around with the *Test Network*
-    you can set this parameter to `TEST`. This will also switch to using
-    a  test wallet so your accounts don't get mixed up.
-    Defaults to ` https://horizon.stellar.org/` (LIVE NETWORK)
-    Can be set to `TEST` (will connect to `https://horizon-testnet.stellar.org/`)
-    or to a specific [Horizon Server](https://www.stellar.org/developers/horizon/reference/index.html)
-
-These parameters can be set as environment variables on the command
-line.
-
-```
-$ HORIZON=TEST node . account info GD....
-```
-
-
-## How to Contribute to Luminate
-Luminate is open to everyone and any help is greatly appreciated.  Feel
-free to [raise issues](https://github.com/theproductiveprogrammer/luminate/issues),
-[contribute features](https://github.com/theproductiveprogrammer/luminate/pulls),
-[improve the documentation](https://github.com/theproductiveprogrammer/luminate/pulls),
-or simply [add your suggestions](https://github.com/theproductiveprogrammer/luminate/issues).
 
 ### Pending Features
 
-* Batch File Support
 * Multi-Signature Support
 * Offer Management
-* Support Setting Options
 * Mapping Stellar Error Codes
-* Modularize File
 * Implement [Whisper](https://github.com/hmatejx/Interstellar-Whisper)
-* Implement account creation and message signing directly so all private
-  operations are easily visible and not hidden in `stellar-api.js` dependency
