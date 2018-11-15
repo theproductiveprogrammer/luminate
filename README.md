@@ -187,7 +187,7 @@ free to [raise issues](https://github.com/theproductiveprogrammer/luminate/issue
 or simply [add your suggestions](https://github.com/theproductiveprogrammer/luminate/issues).
 
 
-### Pending Features
+## Pending Features
 
 * Multi-Signature Support
 * Offer Management
