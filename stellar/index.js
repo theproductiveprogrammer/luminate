@@ -19,6 +19,8 @@ module.exports = {
     clearFlags: clearFlags,
     editTrust: editTrust,
     editSigner: editSigner,
+    setWeights: setWeights,
+    setMasterWeight: setMasterWeight,
 }
 
 /*      understand/
@@ -297,6 +299,49 @@ function editSigner(hz, for_, weight, signer, source, cb) {
     try {
         let svr = getSvr(hz)
         let op = { signer: { ed25519PublicKey: signer, weight: weight } }
+        if(source) op.source = source
+        svr.loadAccount(for_.pub)
+            .then(ai => {
+                let txn = new StellarSdk.TransactionBuilder(ai)
+                    .addOperation(StellarSdk.Operation.setOptions(op))
+                    .build()
+                txn.sign(for_._kp)
+                return svr.submitTransaction(txn)
+            })
+            .then(txnres => cb(null, txnres))
+            .catch(cb)
+    } catch(e) {
+        cb(e)
+    }
+}
+
+function setWeights(hz, for_, low, medium, high, source, cb) {
+    try {
+        let svr = getSvr(hz)
+        let op = {}
+        if(source) op.source = source
+        if(low) op.lowThreshold = low
+        if(medium) op.medThreshold = medium
+        if(high) op.highThreshold = high
+        svr.loadAccount(for_.pub)
+            .then(ai => {
+                let txn = new StellarSdk.TransactionBuilder(ai)
+                    .addOperation(StellarSdk.Operation.setOptions(op))
+                    .build()
+                txn.sign(for_._kp)
+                return svr.submitTransaction(txn)
+            })
+            .then(txnres => cb(null, txnres))
+            .catch(cb)
+    } catch(e) {
+        cb(e)
+    }
+}
+
+function setMasterWeight(hz, for_, weight, source, cb) {
+    try {
+        let svr = getSvr(hz)
+        let op = { masterWeight: weight }
         if(source) op.source = source
         svr.loadAccount(for_.pub)
             .then(ai => {

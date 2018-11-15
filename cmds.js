@@ -34,6 +34,8 @@ module.exports = {
     removeTrust: removeTrust,
     addSigner: addSigner,
     removeSigner: removeSigner,
+    setWeights: setWeights,
+    setMasterWeight: setMasterWeight,
 }
 
 function create(cfg, args, op) {
@@ -526,6 +528,64 @@ function editSigner(cfg, for_, weight, signer, source, op) {
                 })
             })
         }
+    })
+}
+
+function setWeights(cfg, args, op) {
+    const errmsg = {
+        NOFOR: op.chalk`{red.bold Error:} Specify {green --for}`,
+        NOWEIGHT: op.chalk`{red.bold Error:} Specify {green --low}, {green --medium}, and/or {green --high}`,
+    }
+
+    let p = loadParams(args)
+    if(!p.for) return op.err(errmsg.NOFOR)
+    if(!p.low && !p.medium && !p.high) return op.err(errmsg.NOWEIGHT)
+
+    withPassword(cfg, (pw) => {
+        luminate.wallet.load(pw, cfg.wallet_dir, p.for, (err, for_) => {
+            if(err) return op.err(err)
+            else {
+                luminate.stellar.setWeights(
+                    cfg.horizon,
+                    for_,
+                    p.low,
+                    p.medium,
+                    p.high,
+                    p.source,
+                    (err) => {
+                        if(err) return op.err(err)
+                        else op.out(op.chalk`{bold Weight(s) set}`)
+                    })
+            }
+        })
+    })
+}
+
+function setMasterWeight(cfg, args, op) {
+    const errmsg = {
+        NOFOR: op.chalk`{red.bold Error:} Specify {green --for}`,
+        NOWEIGHT: op.chalk`{red.bold Error:} Specify {green --weight}`,
+    }
+
+    let p = loadParams(args)
+    if(!p.for) return op.err(errmsg.NOFOR)
+    if(!p.weight) return op.err(errmsg.NOWEIGHT)
+
+    withPassword(cfg, (pw) => {
+        luminate.wallet.load(pw, cfg.wallet_dir, p.for, (err, for_) => {
+            if(err) return op.err(err)
+            else {
+                luminate.stellar.setMasterWeight(
+                    cfg.horizon,
+                    for_,
+                    p.weight,
+                    p.source,
+                    (err) => {
+                        if(err) return op.err(err)
+                        else op.out(op.chalk`{bold Master Weight set}`)
+                    })
+            }
+        })
     })
 }
 

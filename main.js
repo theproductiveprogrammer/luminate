@@ -172,6 +172,8 @@ function args2UserReq(cfg, op) {
         { rx: /^remove-trust$/, fn: cmds.removeTrust },
         { rx: /^add-signer$/, fn: cmds.addSigner },
         { rx: /^remove-signer$/, fn: cmds.removeSigner },
+        { rx: /^set-weights$/, fn: cmds.setWeights },
+        { rx: /^set-master-weight$/, fn: cmds.setMasterWeight },
         { rx: /^(version|ver|-v|-ver|--version|--ver)$/, fn: showinfo },
         { rx: /^(-h|--help|help)$/, fn: showhelp },
     ];

@@ -120,6 +120,8 @@ different from the current wallet account.
 To do this simply specify the {bold.red --source} flag and the transaction will be
 submitted against the given source account.
 
+(For now you can only add other accounts as {gray signers})
+
 For example:
 
     {red ./luminate} {green activate} {bold --from} activeAccount {bold --amt} 2 inactiveAccount {bold.red --source} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
@@ -139,7 +141,17 @@ In the same manner the {bold.red --source} flag can be set for these other opera
     {red ./luminate} {green revoke-trustline} ...
     {red ./luminate} {green allow-trust} ...
     {red ./luminate} {green remove-trust} ...
+    {red ./luminate} {green set-weights} ...
+    {red ./luminate} {green set-master-weight} ...
 
+
+You can set the weights for the different operations as follows:
+
+    {red ./luminate} {green set-weights} {bold --for} account {bold --low} lowThreshold {bold --medium} mediumThreshold {bold --high} highThreshold
+
+And you can set the master weight for the current account using:
+
+    {red ./luminate} {green set-master-weight} {bold --for} account {bold --weight} masterKeyWeight
 
 
 {bold ENVIRONMENT VARS:}

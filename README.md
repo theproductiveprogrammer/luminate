@@ -169,6 +169,9 @@ To do this simply specify the --source flag and the transaction will
 submitted against the given source account.
 
 
+(For now you can only add other accounts as signers)
+
+
 For example:
 
     ./luminate activate --from activeAccount --amt 2 inactiveAccount --source GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
@@ -188,6 +191,17 @@ In the same manner the --source flag can be set for these other operations:
     ./luminate revoke-trustline ...
     ./luminate allow-trust ...
     ./luminate remove-trust ...
+    ./luminate set-weight ...
+    ./luminate set-master-weight ...
+
+
+You can set the weights for the different operations as follows:
+
+    ./luminate set-weights --for account --low lowThreshold --medium mediumThreshold --high highThreshold
+
+And you can set the master weight for the current account using:
+
+    ./luminate set-master-weight --for account --weight masterKeyWeight
 
 
 
