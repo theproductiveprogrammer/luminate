@@ -236,3 +236,4 @@ or simply [add your suggestions](https://github.com/theproductiveprogrammer/lumi
 * Offer Management
 * Mapping Stellar Error Codes
 * Implement [Whisper](https://github.com/hmatejx/Interstellar-Whisper)
+* Support named wallet accounts as `--source` accounts
