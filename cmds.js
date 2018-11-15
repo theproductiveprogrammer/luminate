@@ -30,6 +30,8 @@ module.exports = {
     revokeTrustline: revokeTrustline,
     setFlags: setFlags,
     clearFlags: clearFlags,
+    allowTrust: allowTrust,
+    removeTrust: removeTrust,
 }
 
 function create(cfg, args, op) {
@@ -413,6 +415,54 @@ function updateFlags(cfg, args, set, op) {
                 })
             }
         })
+    })
+}
+
+
+function allowTrust(cfg, args, op) {
+    setTrust(cfg, args, true, op)
+}
+function removeTrust(cfg, args, op) {
+    setTrust(cfg, args, false, op)
+}
+
+/*      outcome/
+ * Allow or remove trust to the given account
+ */
+function setTrust(cfg, args, allow, op) {
+    const errmsg = {
+        NOFOR: op.chalk`{red.bold Error:} Specify {green --for}`,
+        NOASSETCODE: op.chalk`{red.bold Error:} Specify {green --assetcode}`,
+        NOTO: op.chalk`{red.bold Error:} Specify {green --to}`,
+    }
+
+    let p = loadParams(args)
+    if(!p.for) return op.err(errmsg.NOFOR)
+    if(!p.assetcode) return op.err(errmsg.NOASSETCODE)
+    if(!p.to) return op.err(errmsg.NOTO)
+
+    withAccount(cfg, p.to, (err, to_) => {
+        if(err) return op.err(err)
+        else {
+            withPassword(cfg, (pw) => {
+                luminate.wallet.load(pw, cfg.wallet_dir, p.for, (err, for_) => {
+                    if(err) return op.err(err)
+                    else {
+                        let msg = allow ? "Trustline Authorized" : "Trustline Revoked"
+                        luminate.stellar.allowTrust(
+                            cfg.horizon,
+                            for_,
+                            p.assetcode,
+                            to_.pub,
+                            allow,
+                            (err) => {
+                                if(err) return op.err(err)
+                                else op.out(op.chalk`{bold ${msg}}`)
+                            })
+                    }
+                })
+            })
+        }
     })
 }
 

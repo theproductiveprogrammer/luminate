@@ -168,6 +168,8 @@ function args2UserReq(cfg, op) {
         { rx: /^revoke-trustline$/, fn: cmds.revokeTrustline },
         { rx: /^set-flags$/, fn: cmds.setFlags },
         { rx: /^clear-flags$/, fn: cmds.clearFlags },
+        { rx: /^allow-trust$/, fn: cmds.allowTrust },
+        { rx: /^remove-trust$/, fn: cmds.removeTrust },
         { rx: /^(version|ver|-v|-ver|--version|--ver)$/, fn: showinfo },
         { rx: /^(-h|--help|help)$/, fn: showhelp },
     ];
