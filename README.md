@@ -148,6 +148,36 @@ You can allow/remove trust for a trustline holding your assets:
 
 
 
+### SETTING A SOURCE ACCOUNT
+
+Stellar allows an account to have multiple signatories. This means that
+you can submit transactions for accounts that are different from yours.
+
+To do this simply specify the --source flag and the transaction will
+be submitted against the given source account.
+
+For example:
+
+    ./luminate activate --from activeAccount --amt 2 inactiveAccount --source GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+
+will activate the new account but use funds from GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE instead of the activeAccount.
+
+    ./luminate pay --from myFirstAccount --amt XLM:12.345 --to GBHEJM54VIBM6GPC5FZTD7A4O5VZCZAUOYSEIQUXKWJMHL3QMUOJHKHR --source GD6E56QMLH4IYFMWDIRRGRVUEWS2ZHEKHO7Y2OTGWD6VSEQGP4BSJXPV
+
+Herea again myFirstAccount is making a payment but the funds will be taken from the source account GD6E56QMLH4IYFMWDIRRGRVUEWS2ZHEKHO7Y2OTGWD6VSEQGP4BSJXPV.
+
+
+In the same manner the --source flag can be set for these other operations:
+
+    ./luminate set-flags ...
+    ./luminate clear-flags ...
+    ./luminate set-trustline ...
+    ./luminate revoke-trustline ...
+    ./luminate allow-trust ...
+    ./luminate remove-trust ...
+
+
+
 ### ENVIRONMENT VARS:
 The following environmental variables control the behaviour of Luminate.
 They can also be set in a file called ".env".

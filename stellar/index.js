@@ -56,18 +56,21 @@ function status(hz, acc, cb) {
         })
 }
 
-function activate(hz, from, amt, acc, cb) {
+function activate(hz, from, amt, acc, source, cb) {
     let svr = getSvr(hz)
     if(!from._kp) return cb(`Account missing keypair - did you forget to load it?`)
     if(!StellarSdk.StrKey.isValidEd25519PublicKey(acc.pub)) return cb(`Not a valid account: ${acc.pub}`)
 
+    let op = {
+        destination: acc.pub,
+        startingBalance: amt,
+    }
+    if(source) op.source = source
+
     svr.loadAccount(from.pub)
         .then(ai => {
             let txn = new StellarSdk.TransactionBuilder(ai)
-                .addOperation(StellarSdk.Operation.createAccount({
-                    destination: acc.pub,
-                    startingBalance: amt,
-                }))
+                .addOperation(StellarSdk.Operation.createAccount(op))
                 .build()
             txn.sign(from._kp)
             return svr.submitTransaction(txn)
@@ -77,7 +80,7 @@ function activate(hz, from, amt, acc, cb) {
 }
 
 
-function pay(hz, from, asset, amt, to, cb) {
+function pay(hz, from, asset, amt, to, source, cb) {
     let svr = getSvr(hz)
     if(!from._kp) return cb(`Account missing keypair - did you forget to load it?`)
     if(!StellarSdk.StrKey.isValidEd25519PublicKey(to.pub)) return cb(`Not a valid account: ${to.pub}`)
@@ -86,12 +89,14 @@ function pay(hz, from, asset, amt, to, cb) {
         if(err) cb(err)
         else {
             with_stellar_asset_1(from, asset, (err, asset_) => {
+                let op = {
+                    destination: to.pub,
+                    asset: asset_,
+                    amount: amt,
+                }
+                if(source) op.source = source
                 let txn = new StellarSdk.TransactionBuilder(ai)
-                    .addOperation(StellarSdk.Operation.payment({
-                        destination: to.pub,
-                        asset: asset_,
-                        amount: amt,
-                    }))
+                    .addOperation(StellarSdk.Operation.payment(op))
                     .build()
                 txn.sign(from._kp)
                 svr.submitTransaction(txn)
@@ -185,11 +190,12 @@ function listAssets(hz, out, err) {
     }
 }
 
-function setTrustline(hz, for_, assetcode, issuer, cb) {
+function setTrustline(hz, for_, assetcode, issuer, source, cb) {
     try {
         let svr = getSvr(hz)
         let asset = new StellarSdk.Asset(assetcode, issuer)
         let op = { asset : asset }
+        if(source) op.source = source
         svr.loadAccount(for_.pub)
             .then(ai => {
                 let txn = new StellarSdk.TransactionBuilder(ai)
@@ -205,11 +211,12 @@ function setTrustline(hz, for_, assetcode, issuer, cb) {
     }
 }
 
-function revokeTrustline(hz, for_, assetcode, issuer, cb) {
+function revokeTrustline(hz, for_, assetcode, issuer, source, cb) {
     try {
         let svr = getSvr(hz)
         let asset = new StellarSdk.Asset(assetcode, issuer)
         let op = { asset : asset, limit: "0" }
+        if(source) op.source = source
         svr.loadAccount(for_.pub)
             .then(ai => {
                 let txn = new StellarSdk.TransactionBuilder(ai)
@@ -225,10 +232,11 @@ function revokeTrustline(hz, for_, assetcode, issuer, cb) {
     }
 }
 
-function setFlags(hz, for_, flags, cb) {
+function setFlags(hz, for_, flags, source, cb) {
     try {
         let svr = getSvr(hz)
         let op = { setFlags: flags }
+        if(source) op.source = source
         svr.loadAccount(for_.pub)
             .then(ai => {
                 let txn = new StellarSdk.TransactionBuilder(ai)
@@ -244,10 +252,11 @@ function setFlags(hz, for_, flags, cb) {
     }
 }
 
-function clearFlags(hz, for_, flags, cb) {
+function clearFlags(hz, for_, flags, source, cb) {
     try {
         let svr = getSvr(hz)
         let op = { clearFlags: flags }
+        if(source) op.source = source
         svr.loadAccount(for_.pub)
             .then(ai => {
                 let txn = new StellarSdk.TransactionBuilder(ai)
@@ -263,10 +272,11 @@ function clearFlags(hz, for_, flags, cb) {
     }
 }
 
-function allowTrust(hz, for_, assetcode, to_, allow, cb) {
+function allowTrust(hz, for_, assetcode, to_, allow, source, cb) {
     try {
         let svr = getSvr(hz)
         let op = { trustor: to_, assetCode: assetcode, authorize: allow }
+        if(source) op.source = source
         svr.loadAccount(for_.pub)
             .then(ai => {
                 let txn = new StellarSdk.TransactionBuilder(ai)

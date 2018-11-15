@@ -100,6 +100,37 @@ You can allow/remove trust for a trustline holding your assets:
     {red ./luminate} {green remove-trust} {bold --for} myFirstAccount {bold --assetcode} EVER {bold --to} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
 
 
+
+{bold SETTING A SOURCE ACCOUNT}
+
+{blue Stellar} allows an account to have multiple signatories. This means that
+you can submit transactions for accounts that are different from yours.
+
+To do this simply specify the {bold.red --source} flag and the transaction will
+be submitted against the given source account.
+
+For example:
+
+    {red ./luminate} {green activate} {bold --from} activeAccount {bold --amt} 2 inactiveAccount {bold.red --source} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+
+will activate the new account but use funds from {gray GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE} instead of the {bold activeAccount}.
+
+    {red ./luminate} {green pay} {bold --from} myFirstAccount {bold --amt} XLM:12.345 --to GBHEJM54VIBM6GPC5FZTD7A4O5VZCZAUOYSEIQUXKWJMHL3QMUOJHKHR {bold.red --source} GD6E56QMLH4IYFMWDIRRGRVUEWS2ZHEKHO7Y2OTGWD6VSEQGP4BSJXPV
+
+Herea again {bold myFirstAccount} is making a payment but the funds will be taken from the source account {gray GD6E56QMLH4IYFMWDIRRGRVUEWS2ZHEKHO7Y2OTGWD6VSEQGP4BSJXPV}.
+
+
+In the same manner the {bold.red --source} flag can be set for these other operations:
+
+    {red ./luminate} {green set-flags} ...
+    {red ./luminate} {green clear-flags} ...
+    {red ./luminate} {green set-trustline} ...
+    {red ./luminate} {green revoke-trustline} ...
+    {red ./luminate} {green allow-trust} ...
+    {red ./luminate} {green remove-trust} ...
+
+
+
 {bold ENVIRONMENT VARS:}
 The following environmental variables control the behaviour of {red Luminate}.
 They can also be set in a file called "{bold .env}".

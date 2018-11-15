@@ -93,7 +93,7 @@ function activate(cfg, args, op) {
                             else {
                                 luminate.stellar.activate(
                                     cfg.horizon,
-                                    from_, p.amt, acc_,
+                                    from_, p.amt, acc_, p.source,
                                     (err) => {
                                         if(err) return op.err(err)
                                         else op.out(op.chalk`{bold Activated}`)
@@ -215,7 +215,7 @@ function pay(cfg, args, op) {
                             else {
                                 luminate.stellar.pay(
                                     cfg.horizon,
-                                    from_, asset, amt, to,
+                                    from_, asset, amt, to, p.source,
                                     (err) => {
                                         if(err) return op.err(err)
                                         else op.out(op.chalk`{bold Paid}`)
@@ -314,6 +314,7 @@ function setTrustline(cfg, args, op) {
                             for_,
                             p.assetcode,
                             issuer_.pub,
+                            p.source,
                             (err) => {
                                 if(err) return op.err(err)
                                 else op.out(op.chalk`{bold Trustline Set}`)
@@ -352,6 +353,7 @@ function revokeTrustline(cfg, args, op) {
                             for_,
                             p.assetcode,
                             issuer_.pub,
+                            p.source,
                             (err) => {
                                 if(err) return op.err(err)
                                 else op.out(op.chalk`{bold Trustline Revoked}`)
@@ -409,7 +411,7 @@ function updateFlags(cfg, args, set, op) {
             else {
                 let fn = set ? luminate.stellar.setFlags : luminate.stellar.clearFlags
                 let msg = set ? "Account flags set" : "Account flags cleared"
-                fn(cfg.horizon, for_, accflags, (err) => {
+                fn(cfg.horizon, for_, accflags, p.source, (err) => {
                         if(err) return op.err(err)
                         else op.out(op.chalk`{bold ${msg}}`)
                 })
@@ -455,6 +457,7 @@ function setTrust(cfg, args, allow, op) {
                             p.assetcode,
                             to_.pub,
                             allow,
+                            p.source,
                             (err) => {
                                 if(err) return op.err(err)
                                 else op.out(op.chalk`{bold ${msg}}`)
