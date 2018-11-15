@@ -71,7 +71,7 @@ You can make payments from {red Luminate}:
 
 
 
-{bold ADVANCED FUNCTIONS}
+{bold ASSET MANAGEMENT FUNCTIONS}
 
 You can list all assets on the {blue Stellar} network:
 
@@ -101,13 +101,24 @@ You can allow/remove trust for a trustline holding your assets:
 
 
 
-{bold SETTING A SOURCE ACCOUNT}
+{bold SETTING SIGNATORIES AND A SOURCE ACCOUNT}
 
-{blue Stellar} allows an account to have multiple signatories. This means that
-you can submit transactions for accounts that are different from yours.
+{blue Stellar} allows an account to have multiple signatories. To do this use:
 
-To do this simply specify the {bold.red --source} flag and the transaction will
-be submitted against the given source account.
+    {red ./luminate} {green add-signer} {bold --for} myFirstAccount {bold --weight} 1 GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+
+
+Of course, you can remove a signatory from your account as well:
+
+    {red ./luminate} {green remove-signer} {bold --for} myFirstAccount GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+
+
+This means that the additional signer can can submit transactions for the other
+accounts as well. This means you can submit transactions for accounts that are
+different from the current wallet account.
+
+To do this simply specify the {bold.red --source} flag and the transaction will be
+submitted against the given source account.
 
 For example:
 

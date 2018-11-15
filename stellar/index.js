@@ -17,7 +17,8 @@ module.exports = {
     revokeTrustline: revokeTrustline,
     setFlags: setFlags,
     clearFlags: clearFlags,
-    allowTrust: allowTrust,
+    editTrust: editTrust,
+    editSigner: editSigner,
 }
 
 /*      understand/
@@ -272,7 +273,7 @@ function clearFlags(hz, for_, flags, source, cb) {
     }
 }
 
-function allowTrust(hz, for_, assetcode, to_, allow, source, cb) {
+function editTrust(hz, for_, assetcode, to_, allow, source, cb) {
     try {
         let svr = getSvr(hz)
         let op = { trustor: to_, assetCode: assetcode, authorize: allow }
@@ -281,6 +282,26 @@ function allowTrust(hz, for_, assetcode, to_, allow, source, cb) {
             .then(ai => {
                 let txn = new StellarSdk.TransactionBuilder(ai)
                     .addOperation(StellarSdk.Operation.allowTrust(op))
+                    .build()
+                txn.sign(for_._kp)
+                return svr.submitTransaction(txn)
+            })
+            .then(txnres => cb(null, txnres))
+            .catch(cb)
+    } catch(e) {
+        cb(e)
+    }
+}
+
+function editSigner(hz, for_, weight, signer, source, cb) {
+    try {
+        let svr = getSvr(hz)
+        let op = { signer: { ed25519PublicKey: signer, weight: weight } }
+        if(source) op.source = source
+        svr.loadAccount(for_.pub)
+            .then(ai => {
+                let txn = new StellarSdk.TransactionBuilder(ai)
+                    .addOperation(StellarSdk.Operation.setOptions(op))
                     .build()
                 txn.sign(for_._kp)
                 return svr.submitTransaction(txn)

@@ -32,6 +32,8 @@ module.exports = {
     clearFlags: clearFlags,
     allowTrust: allowTrust,
     removeTrust: removeTrust,
+    addSigner: addSigner,
+    removeSigner: removeSigner,
 }
 
 function create(cfg, args, op) {
@@ -200,7 +202,9 @@ function pay(cfg, args, op) {
     let asset = a[0]
     let amt = a[1]
 
-    op.out(op.chalk`Paying {bold.blue ${amt} ${asset}} from {red ${p.from}} to {green ${p.to}}`)
+    let accfrom = p.source ? p.source : p.from
+
+    op.out(op.chalk`Paying {bold.blue ${amt} ${asset}} from {red ${accfrom}} to {green ${p.to}}`)
 
     withAccount(cfg, p.to, (err, to) => {
         if(err) return op.err(errmsg.BADDEST(p.to))
@@ -451,13 +455,69 @@ function setTrust(cfg, args, allow, op) {
                     if(err) return op.err(err)
                     else {
                         let msg = allow ? "Trustline Authorized" : "Trustline Revoked"
-                        luminate.stellar.allowTrust(
+                        luminate.stellar.editTrust(
                             cfg.horizon,
                             for_,
                             p.assetcode,
                             to_.pub,
                             allow,
                             p.source,
+                            (err) => {
+                                if(err) return op.err(err)
+                                else op.out(op.chalk`{bold ${msg}}`)
+                            })
+                    }
+                })
+            })
+        }
+    })
+}
+
+function addSigner(cfg, args, op) {
+    const errmsg = {
+        NOFOR: op.chalk`{red.bold Error:} Specify {green --for}`,
+        NOWEIGHT: op.chalk`{red.bold Error:} Specify signer {green --weight}`,
+        NOSIGNER: op.chalk`{red.bold Error:} Specify signer account`,
+    }
+
+    let p = loadParams(args)
+    let acc = p._rest[0]
+    if(!p.for) return op.err(errmsg.NOFOR)
+    if(!p.weight) return op.err(errmsg.NOWEIGHT)
+    if(!acc) return op.err(errmsg.NOSIGNER)
+
+    editSigner(cfg, p.for, p.weight, acc, p.source, op)
+}
+
+function removeSigner(cfg, args, op) {
+    const errmsg = {
+        NOFOR: op.chalk`{red.bold Error:} Specify {green --for}`,
+        NOSIGNER: op.chalk`{red.bold Error:} Specify signer account`,
+    }
+
+    let p = loadParams(args)
+    let acc = p._rest[0]
+    if(!p.for) return op.err(errmsg.NOFOR)
+    if(!acc) return op.err(errmsg.NOSIGNER)
+
+    editSigner(cfg, p.for, 0, acc, p.source, op)
+}
+
+function editSigner(cfg, for_, weight, signer, source, op) {
+    withAccount(cfg, signer, (err, signer_) => {
+        if(err) return op.err(err)
+        else {
+            withPassword(cfg, (pw) => {
+                luminate.wallet.load(pw, cfg.wallet_dir, for_, (err, for__) => {
+                    if(err) return op.err(err)
+                    else {
+                        let msg = weight ? "Signer added" : "Signer removed"
+                        luminate.stellar.editSigner(
+                            cfg.horizon,
+                            for__,
+                            weight,
+                            signer_.pub,
+                            source,
                             (err) => {
                                 if(err) return op.err(err)
                                 else op.out(op.chalk`{bold ${msg}}`)
