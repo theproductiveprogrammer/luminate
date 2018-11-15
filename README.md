@@ -118,7 +118,7 @@ You can make payments from Luminate:
 
 
 
-ADVANCED FUNCTIONS
+### ADVANCED FUNCTIONS
 
 You can list all assets on the Stellar network:
 
@@ -148,7 +148,7 @@ You can allow/remove trust for a trustline holding your assets:
 
 
 
-ENVIRONMENT VARS:
+### ENVIRONMENT VARS:
 The following environmental variables control the behaviour of Luminate.
 They can also be set in a file called ".env".
 
