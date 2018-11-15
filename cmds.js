@@ -300,7 +300,7 @@ function setTrustline(cfg, args, op) {
     if(!p.assetcode) return op.err(errmsg.NOASSETCODE)
     if(!p.issuer) return op.err(errmsg.NOISSUER)
 
-    withAccount(cfg, p.issuer, (err, for_) => {
+    withAccount(cfg, p.issuer, (err, issuer_) => {
         if(err) return op.err(err)
         else {
             withPassword(cfg, (pw) => {
@@ -311,7 +311,7 @@ function setTrustline(cfg, args, op) {
                             cfg.horizon,
                             for_,
                             p.assetcode,
-                            p.issuer,
+                            issuer_.pub,
                             (err) => {
                                 if(err) return op.err(err)
                                 else op.out(op.chalk`{bold Trustline Set}`)
@@ -338,7 +338,7 @@ function revokeTrustline(cfg, args, op) {
     if(!p.assetcode) return op.err(errmsg.NOASSETCODE)
     if(!p.issuer) return op.err(errmsg.NOISSUER)
 
-    withAccount(cfg, p.issuer, (err, for_) => {
+    withAccount(cfg, p.issuer, (err, issuer_) => {
         if(err) return op.err(err)
         else {
             withPassword(cfg, (pw) => {
@@ -349,7 +349,7 @@ function revokeTrustline(cfg, args, op) {
                             cfg.horizon,
                             for_,
                             p.assetcode,
-                            p.issuer,
+                            issuer_.pub,
                             (err) => {
                                 if(err) return op.err(err)
                                 else op.out(op.chalk`{bold Trustline Revoked}`)
