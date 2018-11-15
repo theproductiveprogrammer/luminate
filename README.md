@@ -208,14 +208,14 @@ They can also be set in a file called ".env".
 
 
 
-HELP:
+### HELP:
 Running Luminate without any command or any of the following:
 
     ./luminate help
     ./luminate --help
     ./luminate -h
 
-Will bring up this help screen.
+Will bring up a help screen.
 
 You can find the current Luminate version using:
 
