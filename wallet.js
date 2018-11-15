@@ -78,6 +78,7 @@ function createWalletAccount(pw, wallet, name, kp, cb) {
             pkg: 'tweetnacl',
             nonce: crypt.createNonce(),
             salt: crypt.createSalt(),
+            version: 'v2',
         }
         crypt.password2key(account.salt, password, (err, key) => {
             if(err) cb(err)
