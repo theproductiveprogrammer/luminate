@@ -15,6 +15,8 @@ module.exports = {
     listAssets: listAssets,
     setTrustline: setTrustline,
     revokeTrustline: revokeTrustline,
+    setFlags: setFlags,
+    clearFlags: clearFlags,
 }
 
 /*      understand/
@@ -222,3 +224,40 @@ function revokeTrustline(hz, for_, assetcode, issuer, cb) {
     }
 }
 
+function setFlags(hz, for_, flags, cb) {
+    try {
+        let svr = getSvr(hz)
+        let op = { setFlags: flags }
+        svr.loadAccount(for_.pub)
+            .then(ai => {
+                let txn = new StellarSdk.TransactionBuilder(ai)
+                    .addOperation(StellarSdk.Operation.setOptions(op))
+                    .build()
+                txn.sign(for_._kp)
+                return svr.submitTransaction(txn)
+            })
+            .then(txnres => cb(null, txnres))
+            .catch(cb)
+    } catch (e) {
+        cb(e)
+    }
+}
+
+function clearFlags(hz, for_, flags, cb) {
+    try {
+        let svr = getSvr(hz)
+        let op = { clearFlags: flags }
+        svr.loadAccount(for_.pub)
+            .then(ai => {
+                let txn = new StellarSdk.TransactionBuilder(ai)
+                    .addOperation(StellarSdk.Operation.setOptions(op))
+                    .build()
+                txn.sign(for_._kp)
+                return svr.submitTransaction(txn)
+            })
+            .then(txnres => cb(null, txnres))
+            .catch(cb)
+    } catch (e) {
+        cb(e)
+    }
+}

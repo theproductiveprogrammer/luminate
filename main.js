@@ -166,6 +166,8 @@ function args2UserReq(cfg, op) {
         { rx: /^list-assets$/, fn: cmds.listAssets },
         { rx: /^set-trustline$/, fn: cmds.setTrustline },
         { rx: /^revoke-trustline$/, fn: cmds.revokeTrustline },
+        { rx: /^set-flags$/, fn: cmds.setFlags },
+        { rx: /^clear-flags$/, fn: cmds.clearFlags },
         { rx: /^(version|ver|-v|-ver|--version|--ver)$/, fn: showinfo },
         { rx: /^(-h|--help|help)$/, fn: showhelp },
     ];

@@ -125,13 +125,27 @@ You can list all assets on the Stellar network:
     ./luminate list-assets
 
 
+You can also set or clear the auth flags assets you manage:
+
+    ./luminate set-flags --for myFirstAccount --flags AuthRequired,AuthRevokable,AuthImmutable
+    ./luminate clear-flags --for myFirstAccount --flags AuthRequired,AuthRevokable,AuthImmutable
+
+
 You can set up a trustline on for a particular asset:
 
     ./luminate set-trustline --for myFirstAccount --assetcode EVER --issuer GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
 
 
 You can also revoke a trustline:
+
     ./luminate revoke-trustline --for myFirstAccount --assetcode EVER --issuer GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+
+
+You can allow/remove trust for a trustline holding your assets:
+
+    ./luminate allow-trust --for myFirstAccount --assetcode EVER --to GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+    ./luminate remove-trust --for myFirstAccount --assetcode EVER --to GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+
 
 
 ENVIRONMENT VARS:

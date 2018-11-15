@@ -28,6 +28,8 @@ module.exports = {
     listAssets: listAssets,
     setTrustline: setTrustline,
     revokeTrustline: revokeTrustline,
+    setFlags: setFlags,
+    clearFlags: clearFlags,
 }
 
 function create(cfg, args, op) {
@@ -356,6 +358,61 @@ function revokeTrustline(cfg, args, op) {
                 })
             })
         }
+    })
+}
+
+/*      understand/
+ * These are the account authorization flags specified by Stellar.
+ * https://www.stellar.org/developers/guides/concepts/accounts.html#flags
+ */
+const AuthRequiredFlag = 1 << 0
+const AuthRevocableFlag = 1 << 1
+const AuthImmutableFlag = 1 << 2
+
+function setFlags(cfg, args, op) {
+    updateFlags(cfg, args, true, op)
+}
+
+function clearFlags(cfg, args, op) {
+    updateFlags(cfg, args, false, op)
+}
+
+/*      outcome/
+ * Set or clear the given flags
+ */
+function updateFlags(cfg, args, set, op) {
+    const errmsg = {
+        NOFOR: op.chalk`{red.bold Error:} Specify {green --for}`,
+        NOFLAGS: op.chalk`{red.bold Error:} Specify {green --flags}`,
+        SPFLAGS: op.chalk`{red.bold Error:} Specify {green AuthRequired,AuthRevokable, and/or AuthImmutable}`,
+    }
+
+    let p = loadParams(args)
+    if(!p.for) return op.err(errmsg.NOFOR)
+    if(!p.flags) return op.err(errmsg.NOFLAGS)
+
+    if(!p.flags.split) return op.err(errmsg.SPFLAGS)
+    let flags = p.flags.split(',')
+    let accflags = 0
+    for(let i = 0;i < flags.length;i++) {
+        if(flags[i].toLowerCase() == 'authrequired') accflags |= AuthRequiredFlag
+        else if(flags[i].toLowerCase() == 'authrevokable') accflags |= AuthRevocableFlag
+        else if(flags[i].toLowerCase() == 'authimmutable') accflags |= AuthImmutableFlag
+        else return op.err(op.chalk`{red.bold Error:} "${flags[i]}" is not a valid flag`)
+    }
+
+    withPassword(cfg, (pw) => {
+        luminate.wallet.load(pw, cfg.wallet_dir, p.for, (err, for_) => {
+            if(err) return op.err(err)
+            else {
+                let fn = set ? luminate.stellar.setFlags : luminate.stellar.clearFlags
+                let msg = set ? "Account flags set" : "Account flags cleared"
+                fn(cfg.horizon, for_, accflags, (err) => {
+                        if(err) return op.err(err)
+                        else op.out(op.chalk`{bold ${msg}}`)
+                })
+            }
+        })
     })
 }
 
