@@ -91,7 +91,7 @@ function pay(hz, from, asset, amt, to, source, cb) {
     status(hz, from, (err, ai) => {
         if(err) cb(err)
         else {
-            with_stellar_asset_1(from, asset, (err, asset_) => {
+            with_stellar_asset_1(from, asset, ai, (err, asset_) => {
                 let op = {
                     destination: to.pub,
                     asset: asset_,
@@ -109,7 +109,7 @@ function pay(hz, from, asset, amt, to, source, cb) {
         }
     })
 
-    function with_stellar_asset_1(from, asset, cb) {
+    function with_stellar_asset_1(from, asset, ai, cb) {
         if(asset.toLowerCase() == 'xlm') {
             cb(null, StellarSdk.Asset.native())
         } else {
