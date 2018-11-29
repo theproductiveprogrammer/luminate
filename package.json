@@ -1,6 +1,6 @@
 {
   "name": "luminate",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A Scriptable wallet for Stellar Cryptocurrency",
   "main": "index.js",
   "author": "charles.lobo@gmail.com",
@@ -8,9 +8,11 @@
   "dependencies": {
     "base32": "^0.0.6",
     "chalk": "^2.4.1",
+    "csv-reader": "^1.0.3",
     "dotenv": "^6.1.0",
     "read": "^1.0.7",
     "stellar-sdk": "^0.10.3",
+    "stream-filter": "^2.1.0",
     "tweetnacl": "^1.0.0",
     "tweetnacl-util": "^0.15.0"
   }

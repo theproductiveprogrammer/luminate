@@ -5,6 +5,7 @@
  */
 const read = require('read')
 const StellarSdk = require('stellar-sdk')
+const batch = require('./batch');
 
 /*      section/
  * Use our modules
@@ -49,8 +50,8 @@ function create(cfg, args, op) {
 
     withPassword(cfg, (pw) => {
         luminate.wallet.create(pw, cfg.wallet_dir, name, (err, acc) => {
-                if(err) op.err(err)
-                else op.out(op.chalk`{grey ${acc.pub}}`)
+            if(err) op.err(err)
+            else op.out(op.chalk`{grey ${acc.pub}}`)
         })
     })
 
@@ -418,8 +419,8 @@ function updateFlags(cfg, args, set, op) {
                 let fn = set ? luminate.stellar.setFlags : luminate.stellar.clearFlags
                 let msg = set ? "Account flags set" : "Account flags cleared"
                 fn(cfg.horizon, for_, accflags, p.source, (err) => {
-                        if(err) return op.err(err)
-                        else op.out(op.chalk`{bold ${msg}}`)
+                    if(err) return op.err(err)
+                    else op.out(op.chalk`{bold ${msg}}`)
                 })
             }
         })
@@ -441,38 +442,52 @@ function setTrust(cfg, args, allow, op) {
     const errmsg = {
         NOFOR: op.chalk`{red.bold Error:} Specify {green --for}`,
         NOASSETCODE: op.chalk`{red.bold Error:} Specify {green --assetcode}`,
-        NOTO: op.chalk`{red.bold Error:} Specify {green --to}`,
+        NOTO: op.chalk`{red.bold Error:} Specify {green --to} or {green --to-batch}`,
+        BOTHTO: op.chalk`{red.bold Error:} Specify only {green --to} or only {green --to-batch}`,
     }
 
     let p = loadParams(args)
     if(!p.for) return op.err(errmsg.NOFOR)
     if(!p.assetcode) return op.err(errmsg.NOASSETCODE)
-    if(!p.to) return op.err(errmsg.NOTO)
+    if(!p.to && !p.to_batch) return op.err(errmsg.NOTO)
+    if(p.to && p.to_batch) return op.err(errmsg.BOTHTO)
 
-    withAccount(cfg, p.to, (err, to_) => {
-        if(err) return op.err(err)
-        else {
-            withPassword(cfg, (pw) => {
-                luminate.wallet.load(pw, cfg.wallet_dir, p.for, (err, for_) => {
-                    if(err) return op.err(err)
-                    else {
-                        let msg = allow ? "Trustline Authorized" : "Trustline Revoked"
-                        luminate.stellar.editTrust(
-                            cfg.horizon,
-                            for_,
-                            p.assetcode,
-                            to_.pub,
-                            allow,
-                            p.source,
-                            (err) => {
-                                if(err) return op.err(err)
-                                else op.out(op.chalk`{bold ${msg}}`)
-                            })
-                    }
-                })
-            })
-        }
-    })
+    const msg = allow ? "Trustline Authorized" : "Trustline Revoked";
+
+    function processAccount_1(for_, to_, cb) {
+        withAccount(cfg, to_, (err, to_) => {
+            luminate.stellar.editTrust(
+                cfg.horizon,
+                for_,
+                p.assetcode,
+                to_.pub,
+                allow,
+                p.source, cb)
+        });
+    }
+
+    withPassword(cfg,(pw) => {
+        luminate.wallet.load(pw, cfg.wallet_dir, p.for, (err, for_) => {
+            if(err) return op.err(err)
+            else {
+                if (p.to_batch) {
+                    batch.processCSVFile(p.to_batch, (line, cb) => {
+                        const to_ = line[0];
+                        processAccount_1(for_, to_, (err) => {
+                            if (err) op.err(op.chalk`${to_} {red ${parseStellarError(err)}}`)
+                            else op.out(op.chalk`${to_} {bold ${msg}}`);
+                            cb();
+                        });
+                    })
+                } else {
+                    processAccount_1(for_, p.to, (err) => {
+                        if (err) op.err(err)
+                        else op.out(op.chalk`{bold ${msg}}`)
+                    });
+                }
+            }
+        });
+    });
 }
 
 function addSigner(cfg, args, op) {
@@ -648,6 +663,7 @@ function loadParams(args) {
             let arg = args[i]
             let m = arg.match(/^-+(.*)/)
             if(m) {
+                m[1] = m[1].replace('-','_');
                 p[m[1]] = true // value is present
                 val = m[1] // load next item as value
             } else if(val) {
@@ -660,4 +676,26 @@ function loadParams(args) {
     }
     p._rest = rest
     return p
+}
+
+/**
+ *          understand/
+ * The error object returned by failed Stellar transactions contains the entire network response. This
+ * method is a first approach to distill into the essential information needed to understand what went wrong
+ * into a shorter string.
+ */
+function parseStellarError(err) {
+    let errObj = err;
+    if (err.response && err.response.data) {
+        if (err.response.data.extras) {
+            if (err.response.data.extras.result_codes) {
+                errObj = err.response.data.extras.result_codes;
+            }
+            if (err.response.data.extras.result_xdr) {
+                errObj = StellarSdk.xdr.TransactionResult.fromXDR(err.response.data.extras.result_xdr, 'base64');
+            }
+        }
+    }
+    return JSON.stringify(errObj);
+
 }

@@ -96,10 +96,16 @@ You can also revoke a trustline:
 
 You can allow/remove trust for a trustline holding your assets:
 
-    {red ./luminate} {green allow-trust} {bold --for} myFirstAccount {bold --assetcode} EVER {bold --to} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
-    {red ./luminate} {green remove-trust} {bold --for} myFirstAccount {bold --assetcode} EVER {bold --to} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+    {red ./luminate} {green allow-trust} {bold --for} myAssetIssuingAccount {bold --assetcode} EVER {bold --to} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+    {red ./luminate} {green remove-trust} {bold --for} myAssetIssuingAccount {bold --assetcode} EVER {bold --to} GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
 
 
+The allow/remove trust for a trustline also supports batch mode operation using the {bold --to-batch} parameter which takes a file with a list of accounts, one per row as an argument.
+
+    {red ./luminate} {green allow-trust} {bold --for} myAssetIssuingAccount {bold --assetcode} EVER {bold --to-batch} accounts-to-allow.txt
+    {red ./luminate} {green remove-trust} {bold --for} myAssetIssuingAccount {bold --assetcode} EVER {bold --to-batch} accounts-to-freeze.txt
+
+The file with accounts used with {bold --to-batch} may use {bold #} as the start of the row to ignore that row when processing the file. 
 
 {bold SETTING SIGNATORIES AND A SOURCE ACCOUNT}
 
