@@ -105,7 +105,7 @@ The allow/remove trust for a trustline also supports batch mode operation using 
     {red ./luminate} {green allow-trust} {bold --for} myAssetIssuingAccount {bold --assetcode} EVER {bold --to-batch} accounts-to-allow.txt
     {red ./luminate} {green remove-trust} {bold --for} myAssetIssuingAccount {bold --assetcode} EVER {bold --to-batch} accounts-to-freeze.txt
 
-The file with accounts used with {bold --to-batch} may use {bold #} as the start of the row to ignore that row when processing the file. 
+The file with accounts used with {bold --to-batch} may use {bold #} at the start of the row to ignore that row when processing the file. 
 
 {bold SETTING SIGNATORIES AND A SOURCE ACCOUNT}
 

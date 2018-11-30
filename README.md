@@ -143,9 +143,20 @@ You can also revoke a trustline:
 
 You can allow/remove trust for a trustline holding your assets:
 
-    ./luminate allow-trust --for myFirstAccount --assetcode EVER --to GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
-    ./luminate remove-trust --for myFirstAccount --assetcode EVER --to GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+    ./luminate allow-trust --for myAssetIssuingAccount --assetcode EVER --to GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+    ./luminate remove-trust --for myAssetIssuingAccount --assetcode EVER --to GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
 
+### BATCH SUPPORT
+
+The allow/remove trust for a trustline also supports batch mode
+operation using the `--to-batch` parameter which takes a file with
+a list of accounts, one per row as an argument.
+
+     ./luminate allow-trust --for myAssetIssuingAccount --assetcode EVER --to-batch accounts-to-allow.txt
+    ./luminate remove-trust --for myAssetIssuingAccount --assetcode EVER --to-batch accounts-to-freeze.txt
+
+The file with accounts used with `--to-batch` may use `#` at
+the start of the row to ignore that row when processing the file.
 
 
 ### SETTING SIGNATORIES AND A SOURCE ACCOUNT
