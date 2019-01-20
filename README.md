@@ -141,6 +141,11 @@ You can also revoke a trustline:
     ./luminate revoke-trustline --for myFirstAccount --assetcode EVER --issuer GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
 
 
+And you can check if a trustline is set:
+
+    ./luminate is-trustline-set --for myFirstAccount --assetcode EVER --issuer GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE
+
+
 You can allow/remove trust for a trustline holding your assets:
 
     ./luminate allow-trust --for myAssetIssuingAccount --assetcode EVER --to GDRCJ5OJTTIL4VUQZ52PCZYAUINEH2CUSP5NC2R6D6WQ47JBLG6DF5TE

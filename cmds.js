@@ -29,6 +29,7 @@ module.exports = {
     listAssets: listAssets,
     setTrustline: setTrustline,
     revokeTrustline: revokeTrustline,
+    checkTrustline: checkTrustline,
     setFlags: setFlags,
     clearFlags: clearFlags,
     allowTrust: allowTrust,
@@ -367,6 +368,51 @@ function revokeTrustline(cfg, args, op) {
                             })
                     }
                 })
+            })
+        }
+    })
+}
+
+/*      outcome/
+ * Check if a trustline exists for an account by checking the account
+ * balances for entries containing the asset.
+ */
+function checkTrustline(cfg, args, op) {
+    const errmsg = {
+        NOFOR: op.chalk`{red.bold Error:} Specify {green --for}`,
+        NOASSETCODE: op.chalk`{red.bold Error:} Specify {green --assetcode}`,
+        NOISSUER: op.chalk`{red.bold Error:} Specify {green --issuer}`,
+    }
+
+    let p = loadParams(args)
+    if(!p.for) return op.err(errmsg.NOFOR)
+    if(!p.assetcode) return op.err(errmsg.NOASSETCODE)
+    if(!p.issuer) return op.err(errmsg.NOISSUER)
+
+    withAccount(cfg, p.issuer, (err, issuer_) => {
+        if(err) return op.err(err)
+        else {
+            withAccount(cfg, p.for, (err, for_) => {
+                if(err) return op.err(err)
+                else {
+                    luminate.stellar.status(cfg.horizon, for_, (err, ai) => {
+                        if(err) return op.err(err)
+                        else {
+                            if(!ai.balances) op.out('FALSE')
+                            else {
+                                for(let i = 0;i < ai.balances.length;i++) {
+                                    let b = ai.balances[i]
+                                    if(b.asset_code == p.assetcode &&
+                                        b.asset_issuer == issuer_.pub) {
+                                        op.out('TRUE')
+                                        return
+                                    }
+                                }
+                                op.out('FALSE')
+                            }
+                        }
+                    })
+                }
             })
         }
     })
