@@ -638,7 +638,7 @@ function withAccount(cfg, name, cb) {
  */
 function withPassword(cfg, cb) {
     if(cfg.wallet_pw) {
-        cb(null, cfg.wallet_pw)
+        cb(cfg.wallet_pw)
     } else {
         read({
             prompt: "Password:",
