@@ -158,6 +158,7 @@ function args2UserReq(cfg, op) {
     const argmap = [
         { rx: /^create$/, fn: cmds.create },
         { rx: /^activate$/, fn: cmds.activate },
+        { rx: /^is-account-active$/, fn: cmds.isActive },
         { rx: /^list$/, fn: cmds.list },
         { rx: /^status$/, fn: cmds.status },
         { rx: /^pay$/, fn: cmds.pay },

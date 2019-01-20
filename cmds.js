@@ -21,6 +21,7 @@ const luminate = require('./index')
 module.exports = {
     create: create,
     activate: activate,
+    isActive: isActive,
     list: list,
     status: status,
     pay: pay,
@@ -116,6 +117,22 @@ function activate(cfg, args, op) {
         let names = p._rest.map(n => `"${n}"`).join(", ")
         op.err(op.chalk`{red.bold Error:} Too many names for account: {green ${names}}`)
     }
+}
+
+function isActive(cfg, args, op) {
+    withAccount(cfg, args[0], (err, acc) => {
+        if(err) op.err(err)
+        else if(!acc) op.err(op.chalk`{red.bold Error:} "${args[0]}" is not a valid account`)
+        else {
+            luminate.stellar.status(cfg.horizon, acc, (err, ai) => {
+                if(err) op.err(err)
+                else {
+                    if(ai.notfound) op.out('FALSE')
+                    else op.out('TRUE')
+                }
+            })
+        }
+    })
 }
 
 function list(cfg, args, op) {

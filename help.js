@@ -53,6 +53,11 @@ You can check the status of ANY account on Stellar using:
 
     {red ./luminate} {green status} GD6E56QMLH4IYFMWDIRRGRVUEWS2ZHEKHO7Y2OTGWD6VSEQGP4BSJXPV
 
+You can also simply check if an account is active (valid) using:
+
+    {red ./luminate} {green is-account-active} myFirstAccount
+
+
 
 You can import an existing account so that it can be managed by {red Luminate} by using
 the {magenta.bold SECRET Key}:
