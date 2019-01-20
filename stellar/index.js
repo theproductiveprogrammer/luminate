@@ -115,7 +115,7 @@ function pay(hz, from, asset, amt, to, source, cb) {
         } else {
             with_matching_issuer_1(hz, asset, ai, to, (err, issuer) => {
                 if(err) cb(err)
-                else cb(null, StellarSdk.Asset(asset, issuer))
+                else cb(null, new StellarSdk.Asset(asset, issuer))
             })
         }
     }
