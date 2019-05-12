@@ -1,10 +1,14 @@
 {
   "name": "@tpp/luminate",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A Scriptable wallet for Stellar Cryptocurrency",
   "main": "index.js",
   "author": "charles.lobo@gmail.com",
   "license": "MIT",
+  "repository": {
+      "type": "git",
+      "url": "git+https://github.com/theproductiveprogrammer/luminate.git"
+  },
   "dependencies": {
     "base32": "^0.0.6",
     "chalk": "^2.4.1",
