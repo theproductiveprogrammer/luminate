@@ -186,6 +186,7 @@ function args2UserReq(cfg, op) {
         { rx: /^is-account-active$/, fn: cmds.isActive },
         { rx: /^list$/, fn: cmds.list },
         { rx: /^status$/, fn: cmds.status },
+        { rx: /^txns$/, fn: cmds.txns },
         { rx: /^pay$/, fn: cmds.pay },
         { rx: /^import$/, fn: cmds.importSecret },
         { rx: /^export$/, fn: cmds.exportSecret },

@@ -24,6 +24,7 @@ module.exports = {
     isActive: isActive,
     list: list,
     status: status,
+    txns: txns,
     pay: pay,
     importSecret: importSecret,
     exportSecret: exportSecret,
@@ -180,6 +181,52 @@ function status(cfg, args, op) {
                 op.out(JSON.stringify(public_vals_1(ai),null,2))
             }
             show_status_1(accs, ndx+1)
+        })
+    }
+
+    /*      outcome/
+     * Create a duplicate object that contains only the public values of the
+     * given object (ignore functions and `_private` values)
+     */
+    function public_vals_1(o) {
+        let pv = {}
+        for(let k in o) {
+            if(!o.hasOwnProperty(k)) continue
+            if(k.startsWith('_')) continue
+            if(typeof o[k] === 'function') continue
+            pv[k] = o[k]
+        }
+        return pv
+    }
+}
+
+
+function txns(cfg, args, op) {
+    const errmsg = {
+        NOACC: op.chalk`{red.bold Error:} Specify the account to load transactions`,
+    }
+
+    if(args.length != 1) return op.err(errmsg.NOACC)
+
+    withAccount(cfg, args[0], (err, acc) => {
+        if(err) op.err(err)
+        else if(!acc) op.err(op.chalk`{bold.red Error:} "${args[0]}" is not a valid account`)
+        else show_txns_1(acc)
+    })
+
+    function show_txns_1(acc) {
+        if(acc.name) op.out(op.chalk`{bold Transactions for Account:} {green ${acc.name}}`)
+        else op.out(op.chalk`{bold Transactions for Account:} {green ${ai.id}}`)
+        luminate.stellar.accountTransactions(cfg.horizon, acc, (err, txn, streamingerr) => {
+            if(err) {
+                op.err(err)
+            } else if(streamingerr) {
+                if(streamingerr.message) op.err(streamingerr)
+                return 1 // returning a value causes the streaming to stop
+            } else {
+                op.out(op.chalk`\n\n{bold {green Transaction:} ${txn.id}}`)
+                op.out(JSON.stringify(public_vals_1(txn),null,2))
+            }
         })
     }
 

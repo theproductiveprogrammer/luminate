@@ -57,6 +57,11 @@ You can also simply check if an account is active (valid) using:
 
     {red ./luminate} {green is-account-active} myFirstAccount
 
+And you can also check if the transactions against an account using:
+
+    {red ./luminate} {green txns} myFirstAccount
+
+
 
 
 You can import an existing account so that it can be managed by {red Luminate} by using

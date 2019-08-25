@@ -4,6 +4,7 @@
  * Import all the things!
  */
 const StellarSdk = require('stellar-sdk')
+const fromXDR = require('./extrapolateFromXdr')
 
 /*      understand/
  * Provide stellar functionality
@@ -21,6 +22,7 @@ module.exports = {
     editSigner: editSigner,
     setWeights: setWeights,
     setMasterWeight: setMasterWeight,
+    accountTransactions: accountTransactions,
 }
 
 /*      understand/
@@ -353,6 +355,26 @@ function setMasterWeight(hz, for_, weight, source, cb) {
             })
             .then(txnres => cb(null, txnres))
             .catch(cb)
+    } catch(e) {
+        cb(e)
+    }
+}
+
+function accountTransactions(hz, acc, cb) {
+    try {
+        let svr = getSvr(hz)
+        let close = svr.transactions()
+            .forAccount(acc.pub)
+            .stream({
+                onmessage: (tx) => {
+                    tx.envelope_xdr = fromXDR(tx.envelope_xdr, "TransactionEnvelope")
+                    tx.result_xdr = fromXDR(tx.result_xdr, "TransactionResult")
+                    if(cb(null, tx)) close()
+                },
+                onerror: (err) => {
+                    if(cb(null, null, err)) close()
+                }
+            })
     } catch(e) {
         cb(e)
     }
