@@ -92,19 +92,44 @@ function setupOutput(cfg) {
      */
     function paged_generator_1(op) {
         if(!op.istty) return console.log
+        op.lines = []
         return function(txt) {
-            let lines = txt.split('\n')
+            /* support multi-entrancy by adding new calls to existing
+             * output and letting first call take care of actual display */
+            if(op.lines.length) {
+                op.lines = op.lines.concat(txt.split('\n'))
+                return
+            }
+            /* first running call */
+            op.lines = txt.split('\n')
+
             let rows = op.rows - 5 // Keep a buffer for multi-line prompts and overflows
-            if(lines.length < rows) {
-                return console.log(txt)
-            } else {
-                show_lines_from_1(0)
+
+            /* if we have a short write - just write
+             * this allows us to write several times
+             * without paging. The problem with paging
+             * is that it causes node to expect us to
+             * exit the process manually (calling process.exit())
+             * and we then would need to track when we
+             * have actually finished all work.
+             */
+            if(op.lines.length < rows) {
+                let lines = op.lines.join('\n')
+                op.lines = []
+                console.log(lines)
+                return
             }
 
-            function show_lines_from_1(ndx) {
-                console.log(lines.slice(ndx,ndx+rows).join('\n'))
-                if(lines.length >= ndx+rows) {
-                    wait_for_keypress_1(() => show_lines_from_1(ndx+rows))
+            show_page_1(0)
+
+            function show_page_1() {
+                let lines = op.lines
+                op.lines = lines.splice(rows)
+
+                console.log(lines.join('\n'))
+
+                if(op.lines.length) {
+                    wait_for_keypress_1(() => show_page_1())
                 } else {
                     process.exit()
                 }
