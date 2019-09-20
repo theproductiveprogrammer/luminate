@@ -383,10 +383,16 @@ function accountTransactions(hz, acc, cb) {
     }
 
     /*      outcome/
-     * Recursively request the next page if the callback wants it
+     * Unwrap the envelope and result and recursively request the next
+     * page if the callback wants it
      */
     function handle_page_1(page) {
-        if(cb(null, page.records)) {
+        let r = page.records.map((tx) => {
+            tx.envelope_xdr = fromXDR(tx.envelope_xdr, "TransactionEnvelope")
+            tx.result_xdr = fromXDR(tx.result_xdr, "TransactionResult")
+            return tx
+        })
+        if(cb(null, r)) {
             page.next()
             .then(handle_page_1)
         }
