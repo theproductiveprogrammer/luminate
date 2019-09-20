@@ -1,6 +1,6 @@
 {
   "name": "@tpp/luminate",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "A Scriptable wallet for Stellar Cryptocurrency",
   "main": "index.js",
   "bin": {
