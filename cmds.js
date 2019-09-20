@@ -217,17 +217,22 @@ function txns(cfg, args, op) {
     function show_txns_1(acc) {
         if(acc.name) op.out(op.chalk`{bold Transactions for Account:} {green ${acc.name}}`)
         else op.out(op.chalk`{bold Transactions for Account:} {green ${ai.id}}`)
-        luminate.stellar.accountTransactions(cfg.horizon, acc, (err, txn, streamingerr) => {
+        luminate.stellar.accountTransactions(cfg.horizon, acc, (err, txns) => {
             if(err) {
                 op.err(err)
-            } else if(streamingerr) {
-                if(streamingerr.message) op.err(streamingerr)
-                return 1 // returning a value causes the streaming to stop
             } else {
-                op.out(op.chalk`\n\n{bold {green Transaction:} ${txn.id}}`)
-                op.out(JSON.stringify(public_vals_1(txn),null,2))
+                for(let i = 0;i < txns.length;i++) {
+                    show_txn_1(txns[i])
+                }
+                if(txns.length) return true /* keep going */
+                else return false           /* stop */
             }
         })
+    }
+
+    function show_txn_1(txn) {
+        op.out(op.chalk`\n\n{bold {green Transaction:} ${txn.id}}`)
+        op.out(JSON.stringify(public_vals_1(txn),null,2))
     }
 
     /*      outcome/

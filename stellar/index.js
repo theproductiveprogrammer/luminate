@@ -360,22 +360,35 @@ function setMasterWeight(hz, for_, weight, source, cb) {
     }
 }
 
+/*      problem/
+ * As there could be a lot of transactions against a given account
+ * they are returned in a paged format. We don't want to gather them all
+ * and provide them to the callback in case the callback wants only a
+ * few.
+ *
+ *      way/
+ * If the callback returns 'true' we will request the next page
+ * otherwise we won't.
+ */
 function accountTransactions(hz, acc, cb) {
     try {
         let svr = getSvr(hz)
         let close = svr.transactions()
             .forAccount(acc.pub)
-            .stream({
-                onmessage: (tx) => {
-                    tx.envelope_xdr = fromXDR(tx.envelope_xdr, "TransactionEnvelope")
-                    tx.result_xdr = fromXDR(tx.result_xdr, "TransactionResult")
-                    if(cb(null, tx)) close()
-                },
-                onerror: (err) => {
-                    if(cb(null, null, err)) close()
-                }
-            })
+            .call()
+            .then(handle_page_1)
+            .catch(cb)
     } catch(e) {
         cb(e)
+    }
+
+    /*      outcome/
+     * Recursively request the next page if the callback wants it
+     */
+    function handle_page_1(page) {
+        if(cb(null, page.records)) {
+            page.next()
+            .then(handle_page_1)
+        }
     }
 }
