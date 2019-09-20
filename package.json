@@ -3,6 +3,9 @@
   "version": "2.2.0",
   "description": "A Scriptable wallet for Stellar Cryptocurrency",
   "main": "index.js",
+  "bin": {
+    "luminate": "./luminate"
+  },
   "author": "charles.lobo@gmail.com",
   "license": "MIT",
   "repository": {
