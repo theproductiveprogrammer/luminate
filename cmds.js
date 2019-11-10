@@ -216,7 +216,7 @@ function txns(cfg, args, op) {
 
     function show_txns_1(acc) {
         if(acc.name) op.out(op.chalk`{bold Transactions for Account:} {green ${acc.name}}`)
-        else op.out(op.chalk`{bold Transactions for Account:} {green ${ai.id}}`)
+        else op.out(op.chalk`{bold Transactions for Account:} {green ${acc.pub}}`)
         luminate.stellar.accountTransactions(cfg.horizon, acc, (err, txns) => {
             if(err) {
                 op.err(err)
