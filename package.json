@@ -15,14 +15,14 @@
   "dependencies": {
     "base32": "^0.0.6",
     "chalk": "^2.4.1",
-    "csv-reader": "^1.0.3",
+    "csv-reader": "^1.0.6",
     "dotenv": "^6.2.0",
     "lodash": "^4.17.15",
     "read": "^1.0.7",
-    "stellar-sdk": "^0.10.3",
+    "stellar-sdk": "^5.0.3",
     "stream-filter": "^2.1.0",
-    "tweetnacl": "^1.0.0",
-    "tweetnacl-util": "^0.15.0"
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1"
   },
   "bugs": {
     "url": "https://github.com/theproductiveprogrammer/luminate/issues"
