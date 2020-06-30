@@ -64,6 +64,8 @@ function convertArm(object, name, r) {
         type: object.switch().name
       }
       r = r[name]
+    } else {
+      r.type = object.switch().name
     }
     convertObject(object[object.arm()](), object.arm(), r)
   } else {
