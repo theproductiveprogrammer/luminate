@@ -28,7 +28,7 @@ function extrapolateFromXdr(input, type) {
 
 
   let r = {}
-  convertObject(xdrObject, null, r)
+  convertObject(xdrObject, type, r)
   return r
 }
 
@@ -38,14 +38,13 @@ function convertObject(object, name, r) {
   } else if (!hasChildren(object)) {
     r[name] =  getValue(object, name)
   } else if (object.switch) {
+    r[name] = {
+      type: object.switch().name
+    }
     convertArm(object, name, r)
   } else {
-    if(name) {
-      r[name] = {}
-      convertNormal(object, r[name])
-    } else {
-      convertNormal(object, r)
-    }
+    r[name] = {}
+    convertNormal(object, r[name])
   }
 }
 
@@ -59,17 +58,12 @@ function convertArray(object) {
 
 function convertArm(object, name, r) {
   if (_.isString(object.arm())) {
-    if(name) {
-      r[name] = {
-        type: object.switch().name
-      }
-      r = r[name]
-    } else {
-      r.type = object.switch().name
+    r[name] = {
+      type: object.switch().name
     }
-    convertObject(object[object.arm()](), object.arm(), r)
+    convertObject(object[object.arm()](), object.arm(), r[name])
   } else {
-    if(name) r[name] = object.switch().name
+    r[name] = object.switch().name
   }
 }
 
