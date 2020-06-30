@@ -28,7 +28,7 @@ function extrapolateFromXdr(input, type) {
 
 
   let r = {}
-  convertNormal(xdrObject, r)
+  convertObject(xdrObject, null, r)
   return r
 }
 
@@ -93,7 +93,7 @@ function hasChildren(object) {
   return true
 }
 
-const amountFields = ['amount', 'startingBalance', 'sendMax', 'destAmount', 'limit']
+const amountFields = ['amount', 'startingBalance', 'sendMax', 'sendAmount', 'destMin', 'destAmount', 'limit']
 
 function getValue(object, name) {
   if (_.includes(amountFields, name)) {
@@ -146,7 +146,7 @@ function getValue(object, name) {
     return {type: 'code', value: partialPublicKeyString}
   }
 
-  if (name === 'ed25519') {
+  if (name === 'ed25519' || name === 'sourceAccountEd25519') {
     var address = StrKey.encodeEd25519PublicKey(object)
     return {type: 'code', value: address}
   }
@@ -157,7 +157,7 @@ function getValue(object, name) {
 
 
   if (object && Buffer.isBuffer(object)) {
-    return {type: 'code', /*raw: object,*/ value: Buffer.from(object).toString('base64')}
+    return {type: 'code', raw: object, value: Buffer.from(object).toString('base64')}
   }
 
   if (typeof object === 'undefined') {
