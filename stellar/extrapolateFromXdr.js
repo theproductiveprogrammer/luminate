@@ -38,13 +38,14 @@ function convertObject(object, name, r) {
   } else if (!hasChildren(object)) {
     r[name] =  getValue(object, name)
   } else if (object.switch) {
-    r[name] = {
-      type: object.switch().name
-    }
     convertArm(object, name, r)
   } else {
-    r[name] = {}
-    convertNormal(object, r[name])
+    if(name) {
+      r[name] = {}
+      convertNormal(object, r[name])
+    } else {
+      convertNormal(object, r)
+    }
   }
 }
 
@@ -58,12 +59,15 @@ function convertArray(object) {
 
 function convertArm(object, name, r) {
   if (_.isString(object.arm())) {
-    r[name] = {
-      type: object.switch().name
+    if(name) {
+      r[name] = {
+        type: object.switch().name
+      }
+      r = r[name]
     }
-    convertObject(object[object.arm()](), object.arm(), r[name])
+    convertObject(object[object.arm()](), object.arm(), r)
   } else {
-    r[name] = object.switch().name
+    if(name) r[name] = object.switch().name
   }
 }
 
