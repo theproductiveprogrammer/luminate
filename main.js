@@ -62,6 +62,12 @@ function getConfiguration() {
         cfg.horizon = 'live'
     }
 
+    if(process.env.LM__TIMEOUT) {
+      cfg.timeout = parseInt(process.env.LM__TIMEOUT)
+      if(isNaN(cfg.timeout)) cfg.timeout = null
+    }
+    if(!cfg.timeout) cfg.timeout = 30
+
     return cfg
 }
 

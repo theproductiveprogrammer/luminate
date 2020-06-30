@@ -39,11 +39,17 @@ const LIVE_HORIZON = "https://horizon.stellar.org/"
 const TEST_HORIZON = "https://horizon-testnet.stellar.org/"
 function getSvr(horizon) {
     if(horizon == 'live') {
-        StellarSdk.Network.usePublicNetwork()
         return new StellarSdk.Server(LIVE_HORIZON)
     } else {
-        StellarSdk.Network.useTestNetwork()
         return new StellarSdk.Server(TEST_HORIZON)
+    }
+}
+
+function getNetworkPassphrase(horizon) {
+    if(horizon == 'live') {
+        return StellarSdk.Networks.PUBLIC
+    } else {
+        return StellarSdk.Networks.TESTNET
     }
 }
 
@@ -85,8 +91,9 @@ function activate(hz, from, amt, acc, source, cb) {
 }
 
 
-function pay(hz, from, asset, amt, to, source, cb) {
+function pay(tm, hz, from, asset, amt, to, source, cb) {
     let svr = getSvr(hz)
+    let networkPassphrase = getNetworkPassphrase(hz)
     if(!from._kp) return cb(`Account missing keypair - did you forget to load it?`)
     if(!StellarSdk.StrKey.isValidEd25519PublicKey(to.pub)) return cb(`Not a valid account: ${to.pub}`)
 
@@ -99,14 +106,19 @@ function pay(hz, from, asset, amt, to, source, cb) {
                     asset: asset_,
                     amount: amt,
                 }
-                if(source) op.source = source
-                let txn = new StellarSdk.TransactionBuilder(ai)
-                    .addOperation(StellarSdk.Operation.payment(op))
-                    .build()
-                txn.sign(from._kp)
-                svr.submitTransaction(txn)
-                    .then(txnres => cb(null, txnres))
-                    .catch(cb)
+                svr.fetchBaseFee()
+                  .then(fee => {
+                    if(source) op.source = source
+                    let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
+                      .addOperation(StellarSdk.Operation.payment(op))
+                      .setTimeout(tm)
+                      .build()
+                    txn.sign(from._kp)
+                    svr.submitTransaction(txn)
+                      .then(txnres => cb(null, txnres))
+                      .catch(cb)
+                  })
+                  .catch(cb)
             })
         }
     })

@@ -187,6 +187,8 @@ They can also be set in a file called "{bold .env}".
                               {gray (only valid in scripts: "LM__AS_SCRIPT" must be set)}
     {magenta LM__WALLET_FOLDER}     :   Path to wallet folder
                               {gray (defaults to {bold.black .wallet/})}
+    {magenta LM__TIMEOUT}           :   Timeout to use
+                              {gray (defaults to {bold.black 30})}
     {magenta LM__HORIZON}           :   Horizon server to use
                               {gray (defaults to "{bold.black LIVE}". Can be set to "{bold.black TEST}")}
 

@@ -291,6 +291,7 @@ function pay(cfg, args, op) {
                             if(err) return op.err(err)
                             else {
                                 luminate.stellar.pay(
+                                    cfg.timeout,
                                     cfg.horizon,
                                     from_, asset, amt, to, p.source,
                                     (err) => {
