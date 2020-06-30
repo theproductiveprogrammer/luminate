@@ -100,6 +100,7 @@ function activate(cfg, args, op) {
                             if(err) return op.err(err)
                             else {
                                 luminate.stellar.activate(
+                                    cfg.tm,
                                     cfg.horizon,
                                     from_, p.amt, acc_, p.source,
                                     (err) => {

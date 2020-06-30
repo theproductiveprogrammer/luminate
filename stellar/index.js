@@ -67,8 +67,9 @@ function status(hz, acc, cb) {
         })
 }
 
-function activate(hz, from, amt, acc, source, cb) {
+function activate(tm, hz, from, amt, acc, source, cb) {
     let svr = getSvr(hz)
+    let networkPassphrase = getNetworkPassphrase(hz)
     if(!from._kp) return cb(`Account missing keypair - did you forget to load it?`)
     if(!StellarSdk.StrKey.isValidEd25519PublicKey(acc.pub)) return cb(`Not a valid account: ${acc.pub}`)
 
@@ -80,11 +81,16 @@ function activate(hz, from, amt, acc, source, cb) {
 
     svr.loadAccount(from.pub)
         .then(ai => {
-            let txn = new StellarSdk.TransactionBuilder(ai)
-                .addOperation(StellarSdk.Operation.createAccount(op))
-                .build()
-            txn.sign(from._kp)
-            return svr.submitTransaction(txn)
+            svr.fetchBaseFee()
+               .then(fee => {
+                let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
+                    .addOperation(StellarSdk.Operation.createAccount(op))
+                    .setTimeout(tm)
+                    .build()
+                txn.sign(from._kp)
+                return svr.submitTransaction(txn)
+               })
+                .catch(cb)
         })
         .then(txnres => cb(null, txnres))
         .catch(cb)
