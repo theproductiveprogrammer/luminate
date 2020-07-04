@@ -713,6 +713,7 @@ function setMasterWeight(cfg, args, op) {
             if(err) return op.err(err)
             else {
                 luminate.stellar.setMasterWeight(
+                    cfg.timeout,
                     cfg.horizon,
                     for_,
                     p.weight,
