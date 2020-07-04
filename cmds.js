@@ -650,6 +650,7 @@ function editSigner(cfg, for_, weight, signer, source, op) {
                     else {
                         let msg = weight ? "Signer added" : "Signer removed"
                         luminate.stellar.editSigner(
+                            cfg.timeout,
                             cfg.horizon,
                             for__,
                             weight,
