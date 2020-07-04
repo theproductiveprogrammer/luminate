@@ -313,18 +313,23 @@ function clearFlags(tm, hz, for_, flags, source, cb) {
     }
 }
 
-function editTrust(hz, for_, assetcode, to_, allow, source, cb) {
+function editTrust(tm, hz, for_, assetcode, to_, allow, source, cb) {
     try {
         let svr = getSvr(hz)
+        let networkPassphrase = getNetworkPassphrase(hz)
         let op = { trustor: to_, assetCode: assetcode, authorize: allow }
         if(source) op.source = source
         svr.loadAccount(for_.pub)
             .then(ai => {
-                let txn = new StellarSdk.TransactionBuilder(ai)
-                    .addOperation(StellarSdk.Operation.allowTrust(op))
-                    .build()
-                txn.sign(for_._kp)
-                return svr.submitTransaction(txn)
+                return svr.fetchBaseFee()
+                    .then(fee => {
+                        let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
+                            .addOperation(StellarSdk.Operation.allowTrust(op))
+                            .setTimeout(tm)
+                            .build()
+                        txn.sign(for_._kp)
+                        return svr.submitTransaction(txn)
+                    })
             })
             .then(txnres => cb(null, txnres))
             .catch(cb)

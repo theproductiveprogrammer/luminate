@@ -576,6 +576,7 @@ function setTrust(cfg, args, allow, op) {
     function processAccount_1(for_, to_, cb) {
         withAccount(cfg, to_, (err, to_) => {
             luminate.stellar.editTrust(
+                cfg.timeout,
                 cfg.horizon,
                 for_,
                 p.assetcode,
