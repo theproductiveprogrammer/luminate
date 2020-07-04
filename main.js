@@ -8,6 +8,8 @@
  * variables
  */
 require('dotenv').config()
+const util = require('util')
+util.inspect.defaultOptions.depth = null
 
 /*      section/
  * Import all the things!
@@ -78,7 +80,7 @@ function getConfiguration() {
 function setupOutput(cfg) {
     let op = {
         out: console.log,
-        err: console.error,
+        err: showerr,
         chalk: setup_chalk_1(),
         istty: process.stdout.isTTY,
         rows: process.stdout.rows,
@@ -92,6 +94,15 @@ function setupOutput(cfg) {
     op.out = paged_generator_1(op)
 
     return op
+
+    /*      outcome/
+     * If the error has response data, show that otherwise just
+     * dump the entire thing
+     */
+    function showerr(err) {
+        if(err.response && err.response.data) console.error(err.response.data)
+        else console.error(err)
+    }
 
     /*      outcome/
      * Show paged output
