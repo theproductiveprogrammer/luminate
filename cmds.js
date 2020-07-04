@@ -389,6 +389,7 @@ function setTrustline(cfg, args, op) {
                     if(err) return op.err(err)
                     else {
                         luminate.stellar.setTrustline(
+                            cfg.timeout,
                             cfg.horizon,
                             for_,
                             p.assetcode,
