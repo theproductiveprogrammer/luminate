@@ -241,21 +241,28 @@ function setTrustline(tm, hz, for_, assetcode, issuer, source, cb) {
     }
 }
 
-function revokeTrustline(hz, for_, assetcode, issuer, source, cb) {
+function revokeTrustline(tm, hz, for_, assetcode, issuer, source, cb) {
     try {
         let svr = getSvr(hz)
+        let networkPassphrase = getNetworkPassphrase(hz)
         let asset = new StellarSdk.Asset(assetcode, issuer)
         let op = { asset : asset, limit: "0" }
         if(source) op.source = source
         svr.loadAccount(for_.pub)
             .then(ai => {
-                let txn = new StellarSdk.TransactionBuilder(ai)
-                    .addOperation(StellarSdk.Operation.changeTrust(op))
-                    .build()
-                txn.sign(for_._kp)
-                return svr.submitTransaction(txn)
+                svr.fetchBaseFee()
+                .then(fee => {
+                    let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
+                        .addOperation(StellarSdk.Operation.changeTrust(op))
+                        .setTimeout(tm)
+                        .build()
+                    txn.sign(for_._kp)
+                    svr.submitTransaction(txn)
+                        .then(txnres => cb(null, txnres))
+                        .catch(cb)
+                })
+                .catch(cb)
             })
-            .then(txnres => cb(null, txnres))
             .catch(cb)
     } catch(e) {
         cb(e)

@@ -429,6 +429,7 @@ function revokeTrustline(cfg, args, op) {
                     if(err) return op.err(err)
                     else {
                         luminate.stellar.revokeTrustline(
+                            cfg.timeout,
                             cfg.horizon,
                             for_,
                             p.assetcode,
