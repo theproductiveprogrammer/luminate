@@ -269,18 +269,23 @@ function revokeTrustline(tm, hz, for_, assetcode, issuer, source, cb) {
     }
 }
 
-function setFlags(hz, for_, flags, source, cb) {
+function setFlags(tm, hz, for_, flags, source, cb) {
     try {
         let svr = getSvr(hz)
+        let networkPassphrase = getNetworkPassphrase(hz)
         let op = { setFlags: flags }
         if(source) op.source = source
         svr.loadAccount(for_.pub)
             .then(ai => {
-                let txn = new StellarSdk.TransactionBuilder(ai)
-                    .addOperation(StellarSdk.Operation.setOptions(op))
-                    .build()
-                txn.sign(for_._kp)
-                return svr.submitTransaction(txn)
+                svr.fetchBaseFee()
+                .then(fee => {
+                    let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
+                        .addOperation(StellarSdk.Operation.setOptions(op))
+                        .setTimeout(tm)
+                        .build()
+                    txn.sign(for_._kp)
+                    return svr.submitTransaction(txn)
+                })
             })
             .then(txnres => cb(null, txnres))
             .catch(cb)
@@ -289,18 +294,23 @@ function setFlags(hz, for_, flags, source, cb) {
     }
 }
 
-function clearFlags(hz, for_, flags, source, cb) {
+function clearFlags(tm, hz, for_, flags, source, cb) {
     try {
         let svr = getSvr(hz)
+        let networkPassphrase = getNetworkPassphrase(hz)
         let op = { clearFlags: flags }
         if(source) op.source = source
         svr.loadAccount(for_.pub)
             .then(ai => {
-                let txn = new StellarSdk.TransactionBuilder(ai)
-                    .addOperation(StellarSdk.Operation.setOptions(op))
-                    .build()
-                txn.sign(for_._kp)
-                return svr.submitTransaction(txn)
+                svr.fetchBaseFee()
+                    .then(fee => {
+                        let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
+                            .addOperation(StellarSdk.Operation.setOptions(op))
+                            .setTimeout(tm)
+                            .build()
+                        txn.sign(for_._kp)
+                        return svr.submitTransaction(txn)
+                    })
             })
             .then(txnres => cb(null, txnres))
             .catch(cb)
