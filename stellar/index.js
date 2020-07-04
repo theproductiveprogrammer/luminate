@@ -363,9 +363,10 @@ function editSigner(tm, hz, for_, weight, signer, source, cb) {
     }
 }
 
-function setWeights(hz, for_, low, medium, high, source, cb) {
+function setWeights(tm, hz, for_, low, medium, high, source, cb) {
     try {
         let svr = getSvr(hz)
+        let networkPassphrase = getNetworkPassphrase(hz)
         let op = {}
         if(source) op.source = source
         if(low) op.lowThreshold = low
@@ -373,11 +374,15 @@ function setWeights(hz, for_, low, medium, high, source, cb) {
         if(high) op.highThreshold = high
         svr.loadAccount(for_.pub)
             .then(ai => {
-                let txn = new StellarSdk.TransactionBuilder(ai)
-                    .addOperation(StellarSdk.Operation.setOptions(op))
-                    .build()
-                txn.sign(for_._kp)
-                return svr.submitTransaction(txn)
+                return svr.fetchBaseFee()
+                    .then(fee => {
+                        let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
+                            .addOperation(StellarSdk.Operation.setOptions(op))
+                            .setTimeout(tm)
+                            .build()
+                        txn.sign(for_._kp)
+                        return svr.submitTransaction(txn)
+                    })
             })
             .then(txnres => cb(null, txnres))
             .catch(cb)

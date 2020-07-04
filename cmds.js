@@ -682,6 +682,7 @@ function setWeights(cfg, args, op) {
             if(err) return op.err(err)
             else {
                 luminate.stellar.setWeights(
+                    cfg.timeout,
                     cfg.horizon,
                     for_,
                     p.low,
