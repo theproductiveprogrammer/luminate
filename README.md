@@ -237,7 +237,7 @@ They can also be set in a file called ".env".
                               (only valid in scripts: "LM__AS_SCRIPT" must be set)
     LM__WALLET_FOLDER     :   Path to wallet folder
                               (defaults to .wallet/)
-    LM__TIMEOUT           :   Horizon server to use
+    LM__TIMEOUT           :   Time in seconds to wait before failing
                               (defaults to 30)
     LM__HORIZON           :   Horizon server to use
                               (defaults to "LIVE". Can be set to "TEST")
