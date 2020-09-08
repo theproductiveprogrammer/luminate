@@ -224,6 +224,17 @@ And you can set the master weight for the current account using:
     ./luminate set-master-weight --for account --weight masterKeyWeight
 
 
+### MEMO Support:
+Transactions like activate, pay, and operations like trustline, flags,
+signing, and weights also support adding a memo:
+
+    ./luminate ... --memo 'My Memo'
+
+for example
+
+    ./luminate activate --from activeAccount --amt 2 --memo 'Activating
+now' inactiveAccount
+
 
 ### ENVIRONMENT VARS:
 The following environmental variables control the behaviour of Luminate.
