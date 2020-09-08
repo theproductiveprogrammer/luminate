@@ -722,6 +722,7 @@ function setMasterWeight(cfg, args, op) {
                     for_,
                     p.weight,
                     p.source,
+                    p.memo,
                     (err) => {
                         if(err) return op.err(err)
                         else op.out(op.chalk`{bold Master Weight set}`)
