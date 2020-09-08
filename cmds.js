@@ -102,7 +102,7 @@ function activate(cfg, args, op) {
                                 luminate.stellar.activate(
                                     cfg.tm,
                                     cfg.horizon,
-                                    from_, p.amt, acc_, p.source,
+                                    from_, p.amt, acc_, p.source, p.memo,
                                     (err) => {
                                         if(err) return op.err(err)
                                         else op.out(op.chalk`{bold Activated}`)
