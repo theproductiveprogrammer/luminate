@@ -67,7 +67,7 @@ function status(hz, acc, cb) {
         })
 }
 
-function activate(tm, hz, from, amt, acc, source, cb) {
+function activate(tm, hz, from, amt, acc, source, memo, cb) {
     let svr = getSvr(hz)
     let networkPassphrase = getNetworkPassphrase(hz)
     if(!from._kp) return cb(`Account missing keypair - did you forget to load it?`)
@@ -86,7 +86,7 @@ function activate(tm, hz, from, amt, acc, source, cb) {
                     let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
                         .addOperation(StellarSdk.Operation.createAccount(op))
                         .setTimeout(tm)
-                        .build()
+                    txn = buildWithMemo(memo, txn)
                     txn.sign(from._kp)
                     return svr.submitTransaction(txn)
                 })
@@ -96,7 +96,7 @@ function activate(tm, hz, from, amt, acc, source, cb) {
 }
 
 
-function pay(tm, hz, from, asset, amt, to, source, cb) {
+function pay(tm, hz, from, asset, amt, to, source, memo, cb) {
     let svr = getSvr(hz)
     let networkPassphrase = getNetworkPassphrase(hz)
     if(!from._kp) return cb(`Account missing keypair - did you forget to load it?`)
@@ -117,7 +117,7 @@ function pay(tm, hz, from, asset, amt, to, source, cb) {
                         let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
                             .addOperation(StellarSdk.Operation.payment(op))
                             .setTimeout(tm)
-                            .build()
+                        txn = buildWithMemo(memo, txn)
                         txn.sign(from._kp)
                         return svr.submitTransaction(txn)
                     })
@@ -211,7 +211,7 @@ function listAssets(hz, out, err) {
     }
 }
 
-function setTrustline(tm, hz, for_, assetcode, issuer, source, cb) {
+function setTrustline(tm, hz, for_, assetcode, issuer, source, memo, cb) {
     try {
         let svr = getSvr(hz)
         let networkPassphrase = getNetworkPassphrase(hz)
@@ -225,7 +225,7 @@ function setTrustline(tm, hz, for_, assetcode, issuer, source, cb) {
                        let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
                            .addOperation(StellarSdk.Operation.changeTrust(op))
                            .setTimeout(tm)
-                           .build()
+                       txn = buildWithMemo(memo, txn)
                        txn.sign(for_._kp)
                        return svr.submitTransaction(txn)
                    })
@@ -237,7 +237,7 @@ function setTrustline(tm, hz, for_, assetcode, issuer, source, cb) {
     }
 }
 
-function revokeTrustline(tm, hz, for_, assetcode, issuer, source, cb) {
+function revokeTrustline(tm, hz, for_, assetcode, issuer, source, memo, cb) {
     try {
         let svr = getSvr(hz)
         let networkPassphrase = getNetworkPassphrase(hz)
@@ -251,7 +251,7 @@ function revokeTrustline(tm, hz, for_, assetcode, issuer, source, cb) {
                     let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
                         .addOperation(StellarSdk.Operation.changeTrust(op))
                         .setTimeout(tm)
-                        .build()
+                    txn = buildWithMemo(memo, txn)
                     txn.sign(for_._kp)
                     return svr.submitTransaction(txn)
                 })
@@ -263,7 +263,7 @@ function revokeTrustline(tm, hz, for_, assetcode, issuer, source, cb) {
     }
 }
 
-function setFlags(tm, hz, for_, flags, source, cb) {
+function setFlags(tm, hz, for_, flags, source, memo, cb) {
     try {
         let svr = getSvr(hz)
         let networkPassphrase = getNetworkPassphrase(hz)
@@ -276,7 +276,7 @@ function setFlags(tm, hz, for_, flags, source, cb) {
                         let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
                             .addOperation(StellarSdk.Operation.setOptions(op))
                             .setTimeout(tm)
-                            .build()
+                        txn = buildWithMemo(memo, txn)
                         txn.sign(for_._kp)
                         return svr.submitTransaction(txn)
                     })
@@ -288,7 +288,7 @@ function setFlags(tm, hz, for_, flags, source, cb) {
     }
 }
 
-function clearFlags(tm, hz, for_, flags, source, cb) {
+function clearFlags(tm, hz, for_, flags, source, memo, cb) {
     try {
         let svr = getSvr(hz)
         let networkPassphrase = getNetworkPassphrase(hz)
@@ -301,7 +301,7 @@ function clearFlags(tm, hz, for_, flags, source, cb) {
                         let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
                             .addOperation(StellarSdk.Operation.setOptions(op))
                             .setTimeout(tm)
-                            .build()
+                        txn = buildWithMemo(memo, txn)
                         txn.sign(for_._kp)
                         return svr.submitTransaction(txn)
                     })
@@ -313,7 +313,7 @@ function clearFlags(tm, hz, for_, flags, source, cb) {
     }
 }
 
-function editTrust(tm, hz, for_, assetcode, to_, allow, source, cb) {
+function editTrust(tm, hz, for_, assetcode, to_, allow, source, memo, cb) {
     try {
         let svr = getSvr(hz)
         let networkPassphrase = getNetworkPassphrase(hz)
@@ -326,7 +326,7 @@ function editTrust(tm, hz, for_, assetcode, to_, allow, source, cb) {
                         let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
                             .addOperation(StellarSdk.Operation.allowTrust(op))
                             .setTimeout(tm)
-                            .build()
+                        txn = buildWithMemo(memo, txn)
                         txn.sign(for_._kp)
                         return svr.submitTransaction(txn)
                     })
@@ -338,7 +338,7 @@ function editTrust(tm, hz, for_, assetcode, to_, allow, source, cb) {
     }
 }
 
-function editSigner(tm, hz, for_, weight, signer, source, cb) {
+function editSigner(tm, hz, for_, weight, signer, source, memo, cb) {
     try {
         let svr = getSvr(hz)
         let networkPassphrase = getNetworkPassphrase(hz)
@@ -351,7 +351,7 @@ function editSigner(tm, hz, for_, weight, signer, source, cb) {
                         let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
                             .addOperation(StellarSdk.Operation.setOptions(op))
                             .setTimeout(tm)
-                            .build()
+                        txn = buildWithMemo(memo, txn)
                         txn.sign(for_._kp)
                         return svr.submitTransaction(txn)
                     })
@@ -363,7 +363,7 @@ function editSigner(tm, hz, for_, weight, signer, source, cb) {
     }
 }
 
-function setWeights(tm, hz, for_, low, medium, high, source, cb) {
+function setWeights(tm, hz, for_, low, medium, high, source, memo, cb) {
     try {
         let svr = getSvr(hz)
         let networkPassphrase = getNetworkPassphrase(hz)
@@ -379,7 +379,7 @@ function setWeights(tm, hz, for_, low, medium, high, source, cb) {
                         let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
                             .addOperation(StellarSdk.Operation.setOptions(op))
                             .setTimeout(tm)
-                            .build()
+                        txn = buildWithMemo(memo, txn)
                         txn.sign(for_._kp)
                         return svr.submitTransaction(txn)
                     })
@@ -391,7 +391,7 @@ function setWeights(tm, hz, for_, low, medium, high, source, cb) {
     }
 }
 
-function setMasterWeight(tm, hz, for_, weight, source, cb) {
+function setMasterWeight(tm, hz, for_, weight, source, memo, cb) {
     try {
         let svr = getSvr(hz)
         let networkPassphrase = getNetworkPassphrase(hz)
@@ -404,7 +404,7 @@ function setMasterWeight(tm, hz, for_, weight, source, cb) {
                         let txn = new StellarSdk.TransactionBuilder(ai, { fee, networkPassphrase })
                             .addOperation(StellarSdk.Operation.setOptions(op))
                             .setTimeout(tm)
-                            .build()
+                        txn = buildWithMemo(memo, txn)
                         txn.sign(for_._kp)
                         return svr.submitTransaction(txn)
                     })
@@ -453,4 +453,13 @@ function accountTransactions(hz, acc, cb) {
             .then(handle_page_1)
         }
     }
+}
+
+/*    way/
+ * This simple helper function check if there is a memo to
+ * be added to the transaction then build it.
+ */
+function buildWithMemo(memo, txn) {
+  if(memo) txn.addMemo(new StellarSdk.Memo(StellarSdk.MemoText, memo))
+  return txn.build()
 }
