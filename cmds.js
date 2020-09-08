@@ -584,7 +584,7 @@ function setTrust(cfg, args, allow, op) {
                 p.assetcode,
                 to_.pub,
                 allow,
-                p.source, cb)
+                p.source, p.memo, cb)
         });
     }
 
