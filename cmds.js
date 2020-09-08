@@ -395,6 +395,7 @@ function setTrustline(cfg, args, op) {
                             p.assetcode,
                             issuer_.pub,
                             p.source,
+                            p.memo,
                             (err) => {
                                 if(err) return op.err(err)
                                 else op.out(op.chalk`{bold Trustline Set}`)
