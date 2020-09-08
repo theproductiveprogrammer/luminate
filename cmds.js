@@ -692,6 +692,7 @@ function setWeights(cfg, args, op) {
                     p.medium,
                     p.high,
                     p.source,
+                    p.memo,
                     (err) => {
                         if(err) return op.err(err)
                         else op.out(op.chalk`{bold Weight(s) set}`)
