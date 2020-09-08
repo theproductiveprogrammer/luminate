@@ -174,6 +174,15 @@ And you can set the master weight for the current account using:
 
     {red ./luminate} {green set-master-weight} {bold --for} account {bold --weight} masterKeyWeight
 
+{bold MEMO Support:}
+Transactions like {green activate}, {green pay}, and operations like {green trustline}, {green flags}, {green signing}, and {green weights} also support adding a {bold memo}:
+
+    {red ./luminate} ... {green --memo} 'My Memo'
+
+for example
+
+    {red ./luminate} {green.bold activate} {bold --from} activeAccount {bold --amt} 2 {bold --memo} 'Activating now' inactiveAccount
+
 
 {bold ENVIRONMENT VARS:}
 The following environmental variables control the behaviour of {red Luminate}.
