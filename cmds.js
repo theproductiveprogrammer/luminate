@@ -539,7 +539,7 @@ function updateFlags(cfg, args, set, op) {
             else {
                 let fn = set ? luminate.stellar.setFlags : luminate.stellar.clearFlags
                 let msg = set ? "Account flags set" : "Account flags cleared"
-                fn(cfg.timeout, cfg.horizon, for_, accflags, p.source, (err) => {
+                fn(cfg.timeout, cfg.horizon, for_, accflags, p.source, p.memo, (err) => {
                     if(err) return op.err(err)
                     else op.out(op.chalk`{bold ${msg}}`)
                 })
