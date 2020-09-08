@@ -625,7 +625,7 @@ function addSigner(cfg, args, op) {
     if(!p.weight) return op.err(errmsg.NOWEIGHT)
     if(!acc) return op.err(errmsg.NOSIGNER)
 
-    editSigner(cfg, p.for, p.weight, acc, p.source, op)
+    editSigner(cfg, p.for, p.weight, acc, p.source, memo, op)
 }
 
 function removeSigner(cfg, args, op) {
@@ -639,10 +639,10 @@ function removeSigner(cfg, args, op) {
     if(!p.for) return op.err(errmsg.NOFOR)
     if(!acc) return op.err(errmsg.NOSIGNER)
 
-    editSigner(cfg, p.for, 0, acc, p.source, op)
+    editSigner(cfg, p.for, 0, acc, p.source, p.memo, op)
 }
 
-function editSigner(cfg, for_, weight, signer, source, op) {
+function editSigner(cfg, for_, weight, signer, source, memo, op) {
     withAccount(cfg, signer, (err, signer_) => {
         if(err) return op.err(err)
         else {
@@ -658,6 +658,7 @@ function editSigner(cfg, for_, weight, signer, source, op) {
                             weight,
                             signer_.pub,
                             source,
+                            memo,
                             (err) => {
                                 if(err) return op.err(err)
                                 else op.out(op.chalk`{bold ${msg}}`)
