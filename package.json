@@ -14,12 +14,12 @@
   },
   "dependencies": {
     "base32": "^0.0.6",
-    "chalk": "^2.4.1",
+    "chalk": "^4.1.0",
     "csv-reader": "^1.0.6",
-    "dotenv": "^6.2.0",
+    "dotenv": "^8.2.0",
     "lodash": "^4.17.15",
     "read": "^1.0.7",
-    "stellar-sdk": "^5.0.3",
+    "stellar-sdk": "^8.1.0",
     "stream-filter": "^2.1.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
