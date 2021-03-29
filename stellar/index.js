@@ -229,6 +229,7 @@ function setTrustline(tm, hz, for_, assetcode, issuer, source, memo, cb) {
                        txn.sign(for_._kp)
                        return svr.submitTransaction(txn)
                    })
+                   .catch(cb)
             })
             .then(txnres => cb(null, txnres))
             .catch(cb)
